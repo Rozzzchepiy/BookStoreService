@@ -1,7 +1,10 @@
 package com.epam.rd.autocode.spring.project.repo;
 
-import com.epam.rd.autocode.spring.project.model.Client;
+import com.epam.rd.autocode.spring.project.model.ClientProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ClientRepository extends JpaRepository<Client,Long> {
+import java.util.List;
+
+public interface ClientRepository extends JpaRepository<ClientProfile,Long> {
+
 }

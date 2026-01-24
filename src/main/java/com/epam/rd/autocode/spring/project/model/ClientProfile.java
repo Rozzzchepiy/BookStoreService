@@ -7,17 +7,21 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "clients")
+@Table(name = "client_profiles")
 @NoArgsConstructor
 @Data
-public class Client extends User {
+public class ClientProfile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
     @Column(name = "balance", nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
 
-    public Client(Long id, String email, String password, String name, BigDecimal balance) {
-        super(id, email, password, name);
-        this.balance = balance;
-    }
 }

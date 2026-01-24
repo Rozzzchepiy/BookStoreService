@@ -119,8 +119,8 @@ public class OrderModelTest {
     @ParameterizedTest
     @CsvSource({
             "java.lang.Long, id, 1",
-            "com.epam.rd.autocode.spring.project.model.Client, client, 1",
-            "com.epam.rd.autocode.spring.project.model.Employee, employee, 1",
+            "com.epam.rd.autocode.spring.project.model.ClientProfile, client, 1",
+            "com.epam.rd.autocode.spring.project.model.EmployeeProfile, employee, 1",
             "java.time.LocalDateTime, orderDate, 1",
             "java.math.BigDecimal, price, 1",
             "java.util.List, bookItems, 1"

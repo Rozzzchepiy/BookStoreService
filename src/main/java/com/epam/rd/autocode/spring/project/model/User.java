@@ -1,12 +1,18 @@
 package com.epam.rd.autocode.spring.project.model;
 
+import com.epam.rd.autocode.spring.project.model.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@MappedSuperclass
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "users")
 @Data
+@ToString(exclude = {"clientProfile", "employeeProfile"})
 @NoArgsConstructor
 public class User {
 
@@ -22,11 +28,17 @@ public class User {
 
     @Column(name = "name", nullable = false)
     private String name;
-    public User(Long id, String email, String password, String name) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "role")
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles = new HashSet<>();
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+    private ClientProfile clientProfile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private EmployeeProfile employeeProfile;
 
 }
