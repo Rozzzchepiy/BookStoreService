@@ -20,11 +20,11 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private ClientProfile client;
+    private User client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
-    private EmployeeProfile employee;
+    private User employee;
 
     @Column(name = "order_date",  nullable = false)
     private LocalDateTime orderDate;
