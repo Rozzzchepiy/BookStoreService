@@ -8,11 +8,11 @@ public interface BookService {
 
     List<BookDTO> getAllBooks();
 
-    BookDTO getBookByName(String name);
+    BookDTO updateBook(Long id, BookDTO book);
 
-    BookDTO updateBookByName(String name, BookDTO book);
-
-    void deleteBookByName(String name);
+    void deleteBook(Long id);
 
     BookDTO addBook(BookDTO book);
+
+    BookDTO getBookById(Long id);
 }

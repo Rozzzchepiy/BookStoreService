@@ -8,10 +8,12 @@ import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class ClientServiceImpl implements ClientService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<ClientDTO> getAllClients() {
@@ -57,7 +60,9 @@ public class ClientServiceImpl implements ClientService {
             user.setEmail(client.getEmail());
         }
         user.setName(client.getName());
-        user.setPassword(client.getPassword());
+
+        String encodedPassword = passwordEncoder.encode(client.getPassword());
+        user.setPassword(encodedPassword);
 
         user.getClientProfile().setBalance(client.getBalance());
 
@@ -82,8 +87,10 @@ public class ClientServiceImpl implements ClientService {
         User newUser = new User();
         newUser.setName(client.getName());
         newUser.setEmail(client.getEmail());
-        newUser.setPassword(client.getPassword());
-        newUser.setRoles(Set.of(Role.CLIENT));
+        String encodedPassword = passwordEncoder.encode(client.getPassword());
+
+        newUser.setPassword(encodedPassword);
+        newUser.setRoles(new HashSet<>(Set.of(Role.CLIENT)));
 
         ClientProfile clientProfile = new ClientProfile();
         clientProfile.setBalance(client.getBalance());

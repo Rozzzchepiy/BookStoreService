@@ -28,8 +28,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDTO getBookByName(String name) {
-        Book book = bookRepository.findByNameIgnoreCase(name)
+    public BookDTO getBookById(Long id) {
+        Book book = bookRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Book not found"));
 
         return modelMapper.map(book, BookDTO.class);
@@ -37,12 +37,12 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public BookDTO updateBookByName(String name, BookDTO book) {
-        Book updateBook = bookRepository.findByNameIgnoreCase(name)
+    public BookDTO updateBook(Long id, BookDTO book) {
+        Book updateBook = bookRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Book not found"));
 
         modelMapper.map(book, updateBook);
-        updateBook.setName(name);
+        updateBook.setId(id);
 
         Book updatedBook = bookRepository.save(updateBook);
 
@@ -51,8 +51,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public void deleteBookByName(String name) {
-        Book book = bookRepository.findByNameIgnoreCase(name)
+    public void deleteBook(Long id) {
+        Book book = bookRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Book not found"));
         bookRepository.delete(book);
     }
@@ -61,6 +61,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookDTO addBook(BookDTO book) {
         Book newBook = modelMapper.map(book, Book.class);
+        newBook.setId(null);
         Book updatedBook = bookRepository.save(newBook);
         return  modelMapper.map(updatedBook, BookDTO.class);
     }

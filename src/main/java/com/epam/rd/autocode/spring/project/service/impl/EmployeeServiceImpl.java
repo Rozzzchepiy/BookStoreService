@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -86,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         user.setEmail(employee.getEmail());
         user.setName(employee.getName());
         user.setPassword(employee.getPassword());
-        user.setRoles(Set.of(Role.EMPLOYEE));
+        user.setRoles(new HashSet<>(Set.of(Role.EMPLOYEE)));
 
         EmployeeProfile profile = new EmployeeProfile();
         profile.setPhone(employee.getPhone());

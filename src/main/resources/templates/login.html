@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: headerFiles}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <h3 class="text-center mb-4">Вхід у систему</h3>
+
+            <div th:if="${param.error}" class="alert alert-danger">
+                Невірний email або пароль!
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" name="username" class="form-control" required placeholder="email@example.com">
+                </div>
+                <div class="mb-3">
+                    <label>Пароль</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Увійти</button>
+            </form>
+
+            <p class="text-center mt-3">
+                Немає акаунту? <a href="/client/register">Зареєструватися</a>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

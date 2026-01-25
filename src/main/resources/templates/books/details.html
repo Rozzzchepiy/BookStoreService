@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments :: headerFiles}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4">
+    <div class="card shadow mx-auto" style="max-width: 800px;">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Детальна інформація</h4>
+            <span class="badge bg-light text-dark" th:text="${selectedBook.genre}">Жанр</span>
+        </div>
+
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4" th:text="${selectedBook.name}">Назва Книги</h2>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Автор:</strong> <span th:text="${selectedBook.author}">Автор</span></p>
+                    <p><strong>Рік видання:</strong> <span th:text="${selectedBook.publicationDate}">2025</span></p>
+                    <p><strong>Мова:</strong> <span th:text="${selectedBook.language}">UA</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Вікова група:</strong> <span th:text="${selectedBook.ageGroup}">ADULT</span></p>
+                    <p><strong>Кількість сторінок:</strong> <span th:text="${selectedBook.pages}">300</span></p>
+                    <p><strong>Характеристика:</strong> <span th:text="${selectedBook.characteristics}">Тверда обкладинка</span></p>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary">
+                <h5>Опис:</h5>
+                <p class="mb-0" th:text="${selectedBook.description}">Опис книги...</p>
+            </div>
+
+            <h3 class="text-success text-end mt-4">
+                Ціна: <span th:text="${selectedBook.price}">0</span> ₴
+            </h3>
+        </div>
+
+        <div class="card-footer text-center py-3">
+            <a href="/books" class="btn btn-secondary me-2">🔙 До списку</a>
+
+            <form th:action="@{/basket/add}" method="post" style="display: inline-block;" sec:authorize="hasRole('CLIENT')">
+                <input type="hidden" name="bookId" th:value="${selectedBook.id}">
+                <button type="submit" class="btn btn-success btn-lg">
+                    🛒 Додати в кошик
+                </button>
+            </form>
+
+            <a sec:authorize="hasRole('EMPLOYEE')"
+               th:href="@{/books/edit/{id}(id=${selectedBook.id})}"
+               class="btn btn-warning btn-lg">
+                ✏️ Редагувати
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
