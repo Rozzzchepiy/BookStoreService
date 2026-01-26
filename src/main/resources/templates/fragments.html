@@ -13,7 +13,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" th:fragment="navbar">
     <div class="container">
-        <a class="navbar-brand" href="/books">📚 My BookStore</a>
+        <a class="navbar-brand" href="/books">BookStore</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
@@ -26,7 +26,7 @@
                 </li>
 
                 <li class="nav-item" sec:authorize="hasRole('CLIENT')">
-                    <a class="nav-link" href="/cart">Кошик 🛒</a>
+                    <a class="nav-link" href="/cart">Кошик</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('CLIENT')">
                     <a class="nav-link" href="/my-orders">Мої замовлення</a>
@@ -48,7 +48,7 @@
 
                 <div sec:authorize="isAuthenticated()" class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        👤 <span sec:authentication="name">User</span>
+                        <span sec:authentication="name">User</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/profile">Мій профіль</a></li>
@@ -60,6 +60,16 @@
         </div>
     </div>
 </nav>
+
+<footer th:fragment="footer" class="bg-dark text-white text-center py-3 mt-5">
+    <div class="container">
+        <p class="mb-0">
+            &copy; 2026 BookStore Project. All rights reserved.
+            <br>
+            <small class="text-white-50">Designed by Yurii Rozchepii</small>
+        </p>
+    </div>
+</footer>
 
 </body>
 </html>

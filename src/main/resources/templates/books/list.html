@@ -17,11 +17,11 @@
     </a>
   </div>
 
-  <div th:if="${myBooks.empty}" class="alert alert-info">
+  <div th:if="${myBooks != null}" class="alert alert-info">
     Книг поки немає в наявності.
   </div>
 
-  <table class="table table-striped table-hover table-bordered" th:if="${!myBooks.empty}">
+  <table class="table table-striped table-hover table-bordered" th:if="${myBooks != null}">
     <thead class="table-dark">
     <tr>
       <th>ID</th>

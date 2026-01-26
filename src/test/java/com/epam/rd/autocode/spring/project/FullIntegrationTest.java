@@ -45,13 +45,13 @@ class FullIntegrationTest {
         // ==========================================
         System.out.println("--- 1. Додаємо книги ---");
 
-        BookDTO bookDTO1 = new BookDTO(
+        BookDTO bookDTO1 = new BookDTO(0L,
                 "Harry Potter", "Fantasy", AgeGroup.TEEN, BigDecimal.valueOf(100.00),
                 LocalDate.now(), "Rowling", 500, "Magic", "Desc", Language.ENGLISH
         );
         bookService.addBook(bookDTO1);
 
-        BookDTO bookDTO2 = new BookDTO(
+        BookDTO bookDTO2 = new BookDTO(1L,
                 "Java Guide", "Education", AgeGroup.ADULT, BigDecimal.valueOf(50.00),
                 LocalDate.now(), "Schildt", 800, "Code", "Desc", Language.ENGLISH
         );
@@ -114,7 +114,7 @@ class FullIntegrationTest {
         );
         orderDTO.setBookItems(items);
 
-        orderService.addOrder(orderDTO);
+        orderService.addOrder(orderDTO, "client@test.com" );
 
         // ==========================================
         // 5. Фінальні перевірки

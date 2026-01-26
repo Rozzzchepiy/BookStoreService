@@ -8,11 +8,11 @@ public interface EmployeeService {
 
     List<EmployeeDTO> getAllEmployees();
 
-    EmployeeDTO getEmployeeByEmail(String email);
+    EmployeeDTO getEmployeeById(Long id);
 
-    EmployeeDTO updateEmployeeByEmail(String email, EmployeeDTO employee);
+    EmployeeDTO updateEmployee(Long id, EmployeeDTO employee);
 
-    void deleteEmployeeByEmail(String email);
+    void deleteEmployee(Long id);
 
     EmployeeDTO addEmployee(EmployeeDTO employee);
 }

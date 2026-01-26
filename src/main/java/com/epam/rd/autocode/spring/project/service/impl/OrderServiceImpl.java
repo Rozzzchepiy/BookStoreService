@@ -31,13 +31,10 @@ public class OrderServiceImpl implements OrderService {
     private final BookRepository bookRepository;
 
     @Override
-    public List<OrderDTO> getOrdersByClient(String clientEmail) {
-        User client = userRepository.findByEmail(clientEmail)
+    public List<OrderDTO> getOrdersByClient(Long id) {
+        User client = userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Client not found"));
 
-        if (!client.getRoles().contains(Role.CLIENT)){
-            throw new NotFoundException("This user is not a client");
-        }
 
         return orderRepository.findAllByClient(client).stream()
                 .map(this::mapper)
@@ -45,8 +42,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByEmployee(String employeeEmail) {
-        User employee = userRepository.findByEmail(employeeEmail)
+    public List<OrderDTO> getOrdersByClientEmail(String email) {
+        User client = userRepository.findByEmail(email)
+                .orElseThrow(()->new NotFoundException("Client not found"));
+
+        return orderRepository.findAllByClient(client).stream()
+                .map(this::mapper)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDTO> getOrdersByEmployee(Long id) {
+        User employee = userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Employee not found"));
 
         if (!employee.getRoles().contains(Role.EMPLOYEE)){
@@ -62,9 +69,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDTO addOrder(OrderDTO order) {
+    public OrderDTO addOrder(OrderDTO order, String email) {
 
-        User client = userRepository.findByEmail(order.getClientEmail())
+        User client = userRepository.findByEmail(email)
                 .orElseThrow(()->new NotFoundException("Client not found"));
         if (!client.getRoles().contains(Role.CLIENT)){
             throw new NotFoundException("This user is not a client");

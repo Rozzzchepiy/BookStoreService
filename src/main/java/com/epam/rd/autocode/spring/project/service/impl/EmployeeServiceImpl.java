@@ -9,6 +9,7 @@ import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,10 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public List<EmployeeDTO> getAllEmployees() {
         List<User> employees = userRepository.findAllByRolesContaining(Role.EMPLOYEE);
 
@@ -33,8 +36,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDTO getEmployeeByEmail(String email) {
-        User employee = userRepository.findByEmail(email)
+    public EmployeeDTO getEmployeeById(Long id) {
+        User employee = userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Employee not found"));
         if (!employee.getRoles().contains(Role.EMPLOYEE)) {
             throw new NotFoundException("This user is not an employee");
@@ -45,8 +48,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public EmployeeDTO updateEmployeeByEmail(String email, EmployeeDTO employee) {
-        User user = userRepository.findByEmail(email)
+    public EmployeeDTO updateEmployee(Long id, EmployeeDTO employee) {
+        User user = userRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Employee not found"));
         if (!user.getRoles().contains(Role.EMPLOYEE)) {
             throw new NotFoundException("This user is not an employee");
@@ -59,7 +62,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         user.setName(employee.getName());
-        user.setPassword(employee.getPassword());
+        if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(employee.getPassword()));
+        }
 
         user.getEmployeeProfile().setPhone(employee.getPhone());
         user.getEmployeeProfile().setBirthDate(employee.getBirthDate());
@@ -71,8 +76,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public void deleteEmployeeByEmail(String email) {
-        User employee =  userRepository.findByEmail(email)
+    public void deleteEmployee(Long id) {
+        User employee =  userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Employee not found"));
         userRepository.delete(employee);
     }
@@ -86,7 +91,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = new User();
         user.setEmail(employee.getEmail());
         user.setName(employee.getName());
-        user.setPassword(employee.getPassword());
+        String encodedPassword = passwordEncoder.encode(employee.getPassword());
+        user.setPassword(encodedPassword);
         user.setRoles(new HashSet<>(Set.of(Role.EMPLOYEE)));
 
         EmployeeProfile profile = new EmployeeProfile();
@@ -102,6 +108,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeDTO mapper(User user) {
         EmployeeDTO employeeDTO = new EmployeeDTO();
+        employeeDTO.setId(user.getId());
         employeeDTO.setPassword(user.getPassword());
         employeeDTO.setName(user.getName());
         employeeDTO.setEmail(user.getEmail());

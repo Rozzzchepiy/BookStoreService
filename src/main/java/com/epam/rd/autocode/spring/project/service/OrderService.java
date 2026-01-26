@@ -6,9 +6,10 @@ import java.util.*;
 
 public interface OrderService {
 
-    List<OrderDTO> getOrdersByClient(String clientEmail);
+    List<OrderDTO> getOrdersByClient(Long id);
+    List<OrderDTO> getOrdersByClientEmail(String email);
 
-    List<OrderDTO> getOrdersByEmployee(String employeeEmail);
+    List<OrderDTO> getOrdersByEmployee(Long id);
 
-    OrderDTO addOrder(OrderDTO order);
+    OrderDTO addOrder(OrderDTO order, String email);
 }

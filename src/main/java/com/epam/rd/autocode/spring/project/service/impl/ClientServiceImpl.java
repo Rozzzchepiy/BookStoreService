@@ -27,6 +27,7 @@ public class ClientServiceImpl implements ClientService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ClientDTO> getAllClients() {
         List<User> clients = userRepository.findAllByRolesContaining(Role.CLIENT);
         return clients.stream()
@@ -35,8 +36,8 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientDTO getClientByEmail(String email) {
-        User client = userRepository.findByEmail(email)
+    public ClientDTO getClientById(Long id) {
+        User client = userRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Client not found"));
 
         if(!client.getRoles().contains(Role.CLIENT)){
@@ -47,9 +48,17 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public ClientDTO getClientByEmail(String email) {
+        User client = userRepository.findByEmail(email)
+                .orElseThrow(()-> new NotFoundException("Client not found"));
+
+        return mapper(client);
+    }
+
+    @Override
     @Transactional
-    public ClientDTO updateClientByEmail(String email, ClientDTO client) {
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new NotFoundException("Client not found"));
+    public ClientDTO updateClient(Long id, ClientDTO client) {
+        User user = userRepository.findById(id).orElseThrow(()-> new NotFoundException("Client not found"));
         if(!user.getRoles().contains(Role.CLIENT)){
             throw new NotFoundException("This user is not a client");
         }
@@ -61,8 +70,9 @@ public class ClientServiceImpl implements ClientService {
         }
         user.setName(client.getName());
 
-        String encodedPassword = passwordEncoder.encode(client.getPassword());
-        user.setPassword(encodedPassword);
+        if (client.getPassword() != null && !client.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(client.getPassword()));
+        }
 
         user.getClientProfile().setBalance(client.getBalance());
 
@@ -72,8 +82,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
-    public void deleteClientByEmail(String email) {
-        User user =  userRepository.findByEmail(email)
+    public void deleteClient(Long id) {
+        User user =  userRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Client not found"));
         userRepository.delete(user);
     }
@@ -105,6 +115,7 @@ public class ClientServiceImpl implements ClientService {
 
     private ClientDTO mapper(User user) {
         ClientDTO clientDTO = new ClientDTO();
+        clientDTO.setId(user.getId());
         clientDTO.setEmail(user.getEmail());
         clientDTO.setName(user.getName());
         clientDTO.setPassword(user.getPassword());
