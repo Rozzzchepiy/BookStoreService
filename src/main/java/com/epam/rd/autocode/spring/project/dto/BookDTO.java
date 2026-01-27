@@ -17,24 +17,19 @@ public class BookDTO{
 
     private Long id;
 
-    @NotBlank
     private String name;
-    @NotBlank
     private String genre;
-    @NotBlank
+
     private AgeGroup ageGroup;
 
     private BigDecimal price;
 
     private LocalDate publicationDate;
 
-    @NotBlank
     private String author;
     private Integer pages;
 
-    @NotBlank
     private String characteristics;
-    @NotBlank
     private String description;
     private Language language;
 }

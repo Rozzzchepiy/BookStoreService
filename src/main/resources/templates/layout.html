@@ -36,7 +36,7 @@
                     <a class="nav-link text-warning" href="/books/add">Додати книгу</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('EMPLOYEE')">
-                    <a class="nav-link" href="/users">Користувачі</a>
+                    <a class="nav-link" href="/clients">Клієнти</a>
                 </li>
             </ul>
 
@@ -53,7 +53,11 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/profile">Мій профіль</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="/logout">Вихід</a></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item text-danger">Вихід</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>

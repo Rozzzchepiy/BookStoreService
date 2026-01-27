@@ -19,8 +19,9 @@ public class SecurityConfig{
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(a -> a
-                .requestMatchers("/", "/books", "/books/{id}", "/client/register", "/login", "/css/**", "/js/**", "/h2-console/**").permitAll()
+                .requestMatchers("/", "/books", "/client/register", "/login", "/css/**", "/js/**", "/h2-console/**").permitAll()
                 .requestMatchers("/books/add", "/books/edit/**", "/books/delete/**", "/clients/**", "/employees/**", "/orders/employee/**", "/orders/client/**").hasRole("EMPLOYEE")
+                .requestMatchers("/books/{id}").permitAll()
                 .requestMatchers("/profile/**" ).hasRole("CLIENT")
                 .anyRequest().authenticated()
         )

@@ -1,70 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
-<head th:replace="~{fragments :: headerFiles}"></head>
-
+<head th:replace="~{layout :: headerFiles}"></head>
 <body>
 
-<nav th:replace="~{fragments :: navbar}"></nav>
+<nav th:replace="~{layout :: navbar}"></nav>
 
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Список доступних книг</h2>
-
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Каталог книг</h2>
     <a sec:authorize="hasRole('EMPLOYEE')" href="/books/add" class="btn btn-success">
       + Додати книгу
     </a>
   </div>
 
-  <div th:if="${myBooks != null}" class="alert alert-info">
-    Книг поки немає в наявності.
+  <div th:if="${books.isEmpty()}" class="alert alert-info">
+    На жаль, на цей час книг немає в наявності.
   </div>
 
-  <table class="table table-striped table-hover table-bordered" th:if="${myBooks != null}">
-    <thead class="table-dark">
-    <tr>
-      <th>ID</th>
-      <th>Назва</th>
-      <th>Автор</th>
-      <th>Жанр</th>
-      <th>Мова</th>
-      <th>Ціна</th>
-      <th class="text-center">Дії</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="book : ${myBooks}">
-      <td th:text="${book.id}">1</td>
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col" th:each="book : ${books}">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title" th:text="${book.name}">Назва книги</h5>
+          <h6 class="card-subtitle mb-2 text-muted" th:text="${book.author}">Автор</h6>
+          <p class="card-text">
+            <span class="badge bg-primary" th:text="${book.genre}">Жанр</span>
+            <span class="badge bg-secondary" th:text="${book.ageGroup}">Вік</span>
+          </p>
+          <h4 class="text-success mt-3" th:text="${book.price} + ' грн.'">0.00 грн.</h4>
+        </div>
+        <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
+          <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm">Деталі</a>
 
-      <td class="fw-bold" th:text="${book.name}">Java Book</td>
-
-      <td th:text="${book.author}">Author</td>
-      <td th:text="${book.genre}">Genre</td>
-      <td th:text="${book.language}">ENG</td>
-
-      <td th:text="${book.price} + ' ₴'" class="fw-bold text-success">500 ₴</td>
-
-      <td class="text-center" style="min-width: 200px;">
-        <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-primary btn-sm">
-          ℹ️ Інфо
-        </a>
-
-        <span sec:authorize="hasRole('EMPLOYEE')">
-                    <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm">
-                        ✏️
-                    </a>
-                    <a th:href="@{/books/delete/{id}(id=${book.id})}"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('Ви впевнені, що хочете видалити цю книгу?');">
-                        🗑️
-                    </a>
-                </span>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+          <div sec:authorize="hasRole('EMPLOYEE')" class="btn-group">
+            <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm">Edit</a>
+            <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"
+                  onsubmit="return confirm('Ви впевнені, що хочете видалити цю книгу?');" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<footer th:replace="~{layout :: footer}"></footer>
 </body>
 </html>

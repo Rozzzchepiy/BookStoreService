@@ -1,65 +1,72 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: headerFiles}"></head>
+<body class="d-flex flex-column min-vh-100">
 
-<head th:replace="~{fragments :: headerFiles}"></head>
+<nav th:replace="~{layout :: navbar}"></nav>
 
-<body>
-
-<nav th:replace="~{fragments :: navbar}"></nav>
-
-<div class="container mt-4">
-    <div class="card shadow mx-auto" style="max-width: 800px;">
-
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Детальна інформація</h4>
-            <span class="badge bg-light text-dark" th:text="${selectedBook.genre}">Жанр</span>
+<div class="container mt-5 flex-grow-1">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="bg-light d-flex align-items-center justify-content-center text-muted border"
+                 style="height: 400px; font-size: 24px;">
+                Обкладинка
+            </div>
         </div>
 
-        <div class="card-body">
-            <h2 class="card-title text-center mb-4" th:text="${selectedBook.name}">Назва Книги</h2>
+        <div class="col-md-8">
+            <h1 th:text="${book.name}">Назва книги</h1>
+            <h4 class="text-muted mb-3" th:text="'Автор: ' + ${book.author}">Автор</h4>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <p><strong>Автор:</strong> <span th:text="${selectedBook.author}">Автор</span></p>
-                    <p><strong>Рік видання:</strong> <span th:text="${selectedBook.publicationDate}">2025</span></p>
-                    <p><strong>Мова:</strong> <span th:text="${selectedBook.language}">UA</span></p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Вікова група:</strong> <span th:text="${selectedBook.ageGroup}">ADULT</span></p>
-                    <p><strong>Кількість сторінок:</strong> <span th:text="${selectedBook.pages}">300</span></p>
-                    <p><strong>Характеристика:</strong> <span th:text="${selectedBook.characteristics}">Тверда обкладинка</span></p>
-                </div>
+            <h2 class="text-success my-3" th:text="${book.price} + ' грн.'">Ціна</h2>
+
+            <p class="lead" th:text="${book.description}">Опис книги...</p>
+
+            <table class="table table-striped mt-4">
+                <tbody>
+                <tr>
+                    <th scope="row">Жанр</th>
+                    <td th:text="${book.genre}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Вікова категорія</th>
+                    <td th:text="${book.ageGroup}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Мова</th>
+                    <td th:text="${book.language}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Кількість сторінок</th>
+                    <td th:text="${book.pages}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Дата публікації</th>
+                    <td th:text="${book.publicationDate}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Характеристики</th>
+                    <td th:text="${book.characteristics}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="mt-4">
+                <a href="/books" class="btn btn-secondary">← Назад до списку</a>
+
+                <span sec:authorize="hasRole('EMPLOYEE')">
+                    <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning">Редагувати</a>
+                </span>
+
+                <span sec:authorize="hasRole('CLIENT')">
+                    <a href="#" class="btn btn-success">Додати в кошик</a>
+                </span>
             </div>
-
-            <div class="alert alert-secondary">
-                <h5>Опис:</h5>
-                <p class="mb-0" th:text="${selectedBook.description}">Опис книги...</p>
-            </div>
-
-            <h3 class="text-success text-end mt-4">
-                Ціна: <span th:text="${selectedBook.price}">0</span> ₴
-            </h3>
-        </div>
-
-        <div class="card-footer text-center py-3">
-            <a href="/books" class="btn btn-secondary me-2">🔙 До списку</a>
-
-            <form th:action="@{/basket/add}" method="post" style="display: inline-block;" sec:authorize="hasRole('CLIENT')">
-                <input type="hidden" name="bookId" th:value="${selectedBook.id}">
-                <button type="submit" class="btn btn-success btn-lg">
-                    🛒 Додати в кошик
-                </button>
-            </form>
-
-            <a sec:authorize="hasRole('EMPLOYEE')"
-               th:href="@{/books/edit/{id}(id=${selectedBook.id})}"
-               class="btn btn-warning btn-lg">
-                ✏️ Редагувати
-            </a>
         </div>
     </div>
 </div>
 
+<footer th:replace="~{layout :: footer}"></footer>
 </body>
 </html>

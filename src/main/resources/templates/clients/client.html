@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: headerFiles}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container mt-5 flex-grow-1">
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h3>Інформація про клієнта</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9" th:text="${client.id}">1</dd>
+
+                <dt class="col-sm-3">Ім'я:</dt>
+                <dd class="col-sm-9" th:text="${client.name}">Name</dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9" th:text="${client.email}">Email</dd>
+
+                <dt class="col-sm-3">Баланс:</dt>
+                <dd class="col-sm-9 text-success fw-bold" th:text="${client.balance} + ' грн.'">0.00</dd>
+            </dl>
+
+            <div class="mt-3">
+                <a href="/clients" class="btn btn-secondary">← Назад до списку</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

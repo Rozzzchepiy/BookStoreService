@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: headerFiles}"></head>
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Додати нову книгу</h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/books/add}" th:object="${bookDTO}" method="post">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Назва книги *</label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{name}">Помилка</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="author" class="form-label">Автор *</label>
+                                <input type="text" class="form-control" id="author" th:field="*{author}"
+                                       th:classappend="${#fields.hasErrors('author')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{author}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="genre" class="form-label">Жанр *</label>
+                                <input type="text" class="form-control" id="genre" th:field="*{genre}"
+                                       th:classappend="${#fields.hasErrors('genre')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{genre}"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Ціна *</label>
+                                <input type="number" step="0.01" class="form-control" id="price" th:field="*{price}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pages" class="form-label">Кількість сторінок</label>
+                                <input type="number" class="form-control" id="pages" th:field="*{pages}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Вікова група *</label>
+                                <select class="form-select" th:field="*{ageGroup}">
+                                    <option value="">Оберіть...</option>
+                                    <option th:each="group : ${T(com.epam.rd.autocode.spring.project.model.enums.AgeGroup).values()}"
+                                            th:value="${group}" th:text="${group}"></option>
+                                </select>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('ageGroup')}" th:errors="*{ageGroup}"></div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Мова</label>
+                                <select class="form-select" th:field="*{language}">
+                                    <option value="">Оберіть...</option>
+                                    <option th:each="lang : ${T(com.epam.rd.autocode.spring.project.model.enums.Language).values()}"
+                                            th:value="${lang}" th:text="${lang}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Дата публікації</label>
+                                <input type="date" class="form-control" th:field="*{publicationDate}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="characteristics" class="form-label">Характеристики *</label>
+                            <input type="text" class="form-control" id="characteristics" th:field="*{characteristics}"
+                                   th:classappend="${#fields.hasErrors('characteristics')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{characteristics}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Опис *</label>
+                            <textarea class="form-control" id="description" rows="4" th:field="*{description}"
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"></textarea>
+                            <div class="invalid-feedback" th:errors="*{description}"></div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Зберегти книгу</button>
+                            <a href="/books" class="btn btn-secondary">Скасувати</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
