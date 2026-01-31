@@ -1,44 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: headerFiles}"></head>
-<body class="d-flex flex-column min-vh-100">
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Помилка</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100 bg-light">
 
-<nav th:replace="~{layout :: navbar}"></nav>
+<div class="text-center">
+    <h1 class="display-1 fw-bold text-danger" th:text="${status}">404</h1>
 
-<div class="container d-flex flex-column justify-content-center align-items-center flex-grow-1" style="min-height: 60vh;">
+    <p class="lead mb-4" th:text="${error}">Опис помилки...</p>
 
-    <div class="text-center mb-4">
-        <h1 class="display-1 fw-bold text-danger" th:text="${status != null} ? ${status} : 'Error'">Error</h1>
-    </div>
-
-    <div class="card shadow-sm border-danger" style="max-width: 600px; width: 100%;">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Щось пішло не так</h5>
-        </div>
-        <div class="card-body text-center">
-            <h4 class="card-title text-muted mb-4">Вибачте, сталася помилка</h4>
-
-            <p class="card-text lead text-danger" th:if="${error}" th:text="${error}">
-                Невідома помилка.
-            </p>
-            <p class="card-text" th:unless="${error}">
-                Сталася непередбачувана помилка. Спробуйте пізніше.
-            </p>
-
-            <hr>
-
-            <div class="d-flex justify-content-center gap-3">
-                <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                    ← Назад
-                </a>
-                <a href="/books" class="btn btn-primary">
-                    На головну
-                </a>
-            </div>
-        </div>
-    </div>
+    <a th:href="@{/}" class="btn btn-primary">На головну</a>
 </div>
 
-<footer th:replace="~{layout :: footer}"></footer>
 </body>
 </html>

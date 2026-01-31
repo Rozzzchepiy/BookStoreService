@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="~{layout :: headerFiles}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container flex-grow-1">
+    <h2>Деталі замовлення</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">Інформація</div>
+        <div class="card-body">
+            <p><strong>Дата:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></span></p>
+            <p><strong>Клієнт:</strong> <span th:text="${order.clientEmail}"></span></p>
+            <p><strong>Статус:</strong> <span th:text="${order.status}"></span></p>
+            <p><strong>Загальна ціна:</strong> <span th:text="${order.price} + ' грн'"></span></p>
+        </div>
+    </div>
+
+    <h3>Список книг у замовленні</h3>
+    <table class="table table-bordered">
+        <thead class="table-light">
+        <tr>
+            <th>Назва книги</th>
+            <th>Кількість</th>
+            <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${order.bookItems}">
+            <td th:text="${item.bookName}">Назва книги</td> <td th:text="${item.quantity}">1</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div sec:authorize="hasRole('EMPLOYEE')">
+        <a th:href="@{/orders/employee/my}" class="btn btn-secondary">Назад</a>
+    </div>
+    <div sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/orders/admin/all}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div sec:authorize="hasRole('CLIENT')">
+        <a th:href="@{/orders/client/my}" class="btn btn-secondary">Назад</a>
+    </div>
+
+
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

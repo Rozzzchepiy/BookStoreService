@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layout :: headerFiles}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container flex-grow-1">
+
+    <h2 class="mb-4"
+        th:text="${pageTitle != null ? pageTitle : 'Замовлення'}">
+        Замовлення
+    </h2>
+
+    <div th:if="${orders == null || orders.isEmpty()}"
+         class="alert alert-info">
+        Замовлення відсутні
+    </div>
+
+    <table th:if="${orders != null && !orders.isEmpty()}"
+           class="table table-striped align-middle">
+
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Клієнт</th>
+            <th>Працівник</th>
+            <th>Дата</th>
+            <th>Ціна</th>
+            <th>Статус</th>
+            <th class="text-center">Дії</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="order : ${orders}">
+
+            <td th:text="${order.id}"></td>
+
+            <td th:text="${order.clientEmail != null ? order.clientEmail : '-'}"></td>
+
+            <td th:text="${order.employeeEmail != null ? order.employeeEmail : '-'}"></td>
+
+            <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></td>
+
+            <td th:text="${order.price} + ' грн'"></td>
+
+            <td>
+                <span class="badge bg-secondary"
+                      th:if="${order.status?.name() == 'NEW'}">NEW</span>
+
+                <span class="badge bg-warning text-dark"
+                      th:if="${order.status?.name() == 'ASSIGNED'}">ASSIGNED</span>
+
+                <span class="badge bg-success"
+                      th:if="${order.status?.name() == 'DELIVERED'}">DELIVERED</span>
+
+                <span class="badge bg-danger"
+                      th:if="${order.status?.name() == 'CANCELLED'}">CANCELLED</span>
+            </td>
+
+            <td class="text-center">
+
+                <div sec:authorize="hasRole('EMPLOYEE')"
+                     th:if="${order.status?.name() == 'NEW'}">
+                    <form th:action="@{/orders/{id}/take(id=${order.id})}"
+                          method="post">
+                        <button class="btn btn-success btn-sm">
+                            Взяти
+                        </button>
+                    </form>
+                </div>
+
+                <div sec:authorize="hasRole('EMPLOYEE')"
+                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                    <form th:action="@{/orders/{id}/refuse(id=${order.id})}"
+                          method="post"
+                          class="d-inline">
+                        <button class="btn btn-outline-danger btn-sm">
+                            Відмовитись
+                        </button>
+                    </form>
+                </div>
+                <div sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')"
+                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                    <form th:action="@{/orders/{id}/canceled(id=${order.id})}"
+                          method="post"
+                          class="d-inline">
+                        <button class="btn btn-outline-danger btn-sm">
+                            Відмінити Замовлення
+                        </button>
+                    </form>
+                </div>
+                <div sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN', 'CLIENT')">
+                    <a th:href="@{/orders/{id}/details(id=${order.id})}"
+                       class="btn btn-outline-primary btn-sm">
+                        Деталі
+                    </a>
+                </div>
+
+                <div sec:authorize="hasRole('EMPLOYEE')"
+                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                    <form th:action="@{/orders/{id}/deliver(id=${order.id})}"
+                          method="post"
+                          class="d-inline">
+                        <button class="btn btn-outline-primary btn-sm">
+                            Доставлено
+                        </button>
+                    </form>
+                </div>
+
+            </td>
+
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+</body>
+</html>

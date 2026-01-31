@@ -28,15 +28,31 @@
                 <li class="nav-item" sec:authorize="hasRole('CLIENT')">
                     <a class="nav-link" href="/cart">Кошик</a>
                 </li>
-                <li class="nav-item" sec:authorize="hasRole('CLIENT')">
-                    <a class="nav-link" href="/my-orders">Мої замовлення</a>
-                </li>
 
-                <li class="nav-item" sec:authorize="hasRole('EMPLOYEE')">
+                <li class="nav-item" sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')">
                     <a class="nav-link text-warning" href="/books/add">Додати книгу</a>
                 </li>
-                <li class="nav-item" sec:authorize="hasRole('EMPLOYEE')">
+                <li class="nav-item" sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')">
                     <a class="nav-link" href="/clients">Клієнти</a>
+                </li>
+                <li sec:authorize="hasRole('EMPLOYEE')">
+                    <a class="nav-link" href="/orders/employee/my">Мої замовлення</a>
+                </li>
+
+                <li sec:authorize="hasRole('EMPLOYEE')">
+                    <a class="nav-link" href="/orders/available">Нові замовлення</a>
+                </li>
+
+                <li sec:authorize="hasRole('CLIENT')">
+                    <a class="nav-link" href="/orders/client/my">Мої замовлення</a>
+                </li>
+
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/orders/admin/all">Всі замовлення</a>
+                </li>
+
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/employees">Працівники</a>
                 </li>
             </ul>
 

@@ -118,7 +118,7 @@ public class ClientServiceImpl implements ClientService {
         clientDTO.setId(user.getId());
         clientDTO.setEmail(user.getEmail());
         clientDTO.setName(user.getName());
-        clientDTO.setPassword(user.getPassword());
+        clientDTO.setPassword(null);
         clientDTO.setBalance(user.getClientProfile().getBalance());
         return clientDTO;
     }

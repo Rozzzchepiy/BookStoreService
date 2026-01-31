@@ -109,7 +109,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeDTO mapper(User user) {
         EmployeeDTO employeeDTO = new EmployeeDTO();
         employeeDTO.setId(user.getId());
-        employeeDTO.setPassword(user.getPassword());
+        employeeDTO.setPassword(null);
         employeeDTO.setName(user.getName());
         employeeDTO.setEmail(user.getEmail());
         employeeDTO.setBirthDate(user.getEmployeeProfile().getBirthDate());

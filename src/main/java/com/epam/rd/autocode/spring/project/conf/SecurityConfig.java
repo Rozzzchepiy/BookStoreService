@@ -3,6 +3,8 @@ package com.epam.rd.autocode.spring.project.conf;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,14 +18,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig{
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(a -> a
-                .requestMatchers("/", "/books", "/client/register", "/login", "/css/**", "/js/**", "/h2-console/**").permitAll()
-                .requestMatchers("/books/add", "/books/edit/**", "/books/delete/**", "/clients/**", "/employees/**", "/orders/employee/**", "/orders/client/**").hasRole("EMPLOYEE")
-                .requestMatchers("/books/{id}").permitAll()
-                .requestMatchers("/profile/**" ).hasRole("CLIENT")
-                .anyRequest().authenticated()
+                .requestMatchers("/", "/books", "/client/register", "/login", "/h2-console/**").permitAll()
+                .anyRequest().permitAll()
+
         )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
 

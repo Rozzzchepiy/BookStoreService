@@ -31,6 +31,7 @@ public class BookController {
         return "books/details";
     }
 
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id")  Long id, Model model){
         BookDTO bookDTO = bookService.getBookById(id);
@@ -38,12 +39,14 @@ public class BookController {
         return  "books/edit";
     }
 
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @GetMapping("/add")
     public String showAddForm(Model model){
         model.addAttribute("bookDTO",new BookDTO());
         return "books/add";
     }
 
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/add")
     public String addBook(@Valid @ModelAttribute BookDTO book, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -53,13 +56,14 @@ public class BookController {
         return "redirect:/books";
     }
 
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable("id") Long id){
         bookService.deleteBook(id);
         return "redirect:/books";
     }
 
-
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/edit/{id}")
     public String updateBook(@PathVariable("id") Long id, @Valid @ModelAttribute BookDTO book,  BindingResult bindingResult){
         if (bindingResult.hasErrors()){

@@ -4,6 +4,7 @@ import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,14 +19,22 @@ import java.util.stream.Collectors;
 public class EmployeeController {
     private final EmployeeService employeeService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public String getAllEmployees(Model model){
         List<EmployeeDTO> employees = employeeService.getAllEmployees();
         employees.forEach(e -> e.setPassword(null));
-        model.addAttribute("employees", employeeService.getAllEmployees());
+        model.addAttribute("employees", employees);
         return "employees";
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/add")
+    public String createEmployeeForm(Model model) {
+        model.addAttribute("employee", new EmployeeDTO());
+        return "employee_form";
+    }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getEmployeeById(@PathVariable("id") Long id,  Model model){
         EmployeeDTO employee = employeeService.getEmployeeById(id);
@@ -34,16 +43,25 @@ public class EmployeeController {
         return "employee";
     }
 
-    @PostMapping("/edit/{id}")
-    public String updateEmployee(@Valid @ModelAttribute EmployeeDTO employeeDTO, BindingResult bindingResult, @PathVariable("id") Long id, Model model){
-        if(bindingResult.hasErrors()){
-            return "employee";
-        }
-        employeeService.updateEmployee(id, employeeDTO);
-        model.addAttribute("employee", employeeService.getEmployeeById(id));
-        return "redirect:/employees/" + id;
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/edit/{id}")
+    public String editEmployeeForm(@PathVariable("id") Long id, Model model){
+        EmployeeDTO employee = employeeService.getEmployeeById(id);
+        model.addAttribute("employee", employee);
+        return "employee_form";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/edit/{id}")
+    public String updateEmployee(@Valid @ModelAttribute EmployeeDTO employeeDTO, BindingResult bindingResult, @PathVariable("id") Long id){
+        if(bindingResult.hasErrors()){
+            return "employee_form";
+        }
+        employeeService.updateEmployee(id, employeeDTO);
+        return "redirect:/employees";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable("id") Long id){
         employeeService.deleteEmployee(id);

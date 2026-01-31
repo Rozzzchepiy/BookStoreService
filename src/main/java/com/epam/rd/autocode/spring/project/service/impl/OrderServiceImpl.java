@@ -7,12 +7,14 @@ import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.model.BookItem;
 import com.epam.rd.autocode.spring.project.model.Order;
 import com.epam.rd.autocode.spring.project.model.User;
+import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,11 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
+
+    @Override
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll().stream().map(this::mapper).collect(Collectors.toList());
+    }
 
     @Override
     public List<OrderDTO> getOrdersByClient(Long id) {
@@ -56,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
         User employee = userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Employee not found"));
 
-        if (!employee.getRoles().contains(Role.EMPLOYEE)){
+        if (!employee.getRoles().contains(Role.ADMIN)) {
             throw new NotFoundException("This user is not a employee");
         }
 
@@ -66,6 +74,23 @@ public class OrderServiceImpl implements OrderService {
 
 
     }
+
+    @Override
+    public List<OrderDTO> getOrdersByEmployeeEmail(String email) {
+        User employee = userRepository.findByEmail(email)
+                .orElseThrow(()->new NotFoundException("Employee not found"));
+
+        if (!employee.getRoles().contains(Role.EMPLOYEE)){
+            throw new NotFoundException("This user is not a employee");
+        }
+
+        return orderRepository.findAllByEmployee(employee).stream()
+                .map(this::mapper)
+                .collect(Collectors.toList());
+
+    }
+
+
 
     @Override
     @Transactional
@@ -88,6 +113,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Order newOrder = new Order();
+        newOrder.setStatus(OrderStatus.NEW);
         newOrder.setOrderDate(LocalDateTime.now());
         newOrder.setClient(client);
         newOrder.setEmployee(employee);
@@ -130,16 +156,67 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    @Override
+    public List<OrderDTO> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findAllByStatus(status).stream().map(this::mapper).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderDTO getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        return mapper(order);
+    }
+
+    @Override
+    public OrderDTO updateStatus(Long id, OrderStatus status, String email) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if (order.getEmployee() != null) {
+            if (!Objects.equals(order.getEmployee().getEmail(), email)) {
+                throw new AccessDeniedException("This order is no your");
+            }
+        }
+        if (status == OrderStatus.NEW) {
+            order.setEmployee(null);
+        }
+        order.setStatus(status);
+        orderRepository.save(order);
+        return mapper(order);
+    }
+
+    @Override
+    public OrderDTO takeOrder(Long id, String currentUsername) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if  (order.getEmployee() != null) {
+            throw new AccessDeniedException("This order was taken by another employee");
+        }
+
+        User user = userRepository.findByEmail(currentUsername).orElseThrow(() -> new NotFoundException("User not found"));
+
+        order.setEmployee(user);
+
+        order.setStatus(OrderStatus.ASSIGNED);
+        orderRepository.save(order);
+
+        return mapper(order);
+    }
+
     private OrderDTO mapper (Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderDate(order.getOrderDate());
         orderDTO.setPrice(order.getPrice());
+        orderDTO.setId(order.getId());
         if(order.getClient() != null){
             orderDTO.setClientEmail(order.getClient().getEmail());
         }
-        if(orderDTO.getEmployeeEmail() != null){
+        if(order.getEmployee() != null){
             orderDTO.setEmployeeEmail(order.getEmployee().getEmail());
         }
+        orderDTO.setStatus(order.getStatus());
 
         List<BookItemDTO> items =order.getBookItems().stream()
                 .map(item -> new BookItemDTO(item.getBook().getName(), item.getQuantity()))

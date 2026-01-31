@@ -1,10 +1,13 @@
 package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
+import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,29 +22,113 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-    @GetMapping("/basket")
-    public  String getAllMyOrders(Model model, Principal principal){
-        String email = principal.getName();
-        List<OrderDTO> orders = orderService.getOrdersByClientEmail(email);
-        model.addAttribute("orders", orders);
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/all")
+    public String allOrders(Model model) {
+        model.addAttribute("orders", orderService.getAllOrders());
         return "orders";
     }
-    
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("/client/my")
+    public String myClientOrders(Model model, Principal principal) {
+        model.addAttribute(
+                "orders",
+                orderService.getOrdersByClientEmail(principal.getName())
+        );
+        return "orders";
+    }
+
+
+
     @PreAuthorize("hasRole('EMPLOYEE')")
-    @GetMapping("client/{id}")
-    public String getOrderByClient(@PathVariable("id") Long id, Model model){
-        List<OrderDTO> orders = orderService.getOrdersByClient(id);
-        model.addAttribute("orders", orders);
+    @GetMapping("/employee/my")
+    public String myEmployeeOrders(Model model, Principal principal) {
+        model.addAttribute(
+                "orders",
+                orderService.getOrdersByEmployeeEmail(principal.getName())
+        );
         return "orders";
     }
 
     @PreAuthorize("hasRole('EMPLOYEE')")
+    @GetMapping("/available")
+    public String availableOrders(Model model) {
+        model.addAttribute(
+                "orders",
+                orderService.getOrdersByStatus(OrderStatus.NEW)
+        );
+        return "orders";
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/take")
+    public String takeOrder(@PathVariable Long id, Model model, Principal principal) {
+        String currentUsername = principal.getName();
+
+        orderService.takeOrder(id, currentUsername);
+
+        return "redirect:/orders/available";
+    }
+
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/refuse")
+    public String refuseOrder(@PathVariable Long id, Model model, Principal principal) {
+        String currentUsername = principal.getName();
+
+        orderService.updateStatus(id, OrderStatus.NEW , currentUsername);
+
+        return "redirect:/orders/employee/my";
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/canceled")
+    public String canceledOrder(@PathVariable Long id, Model model, Principal principal) {
+        String currentUsername = principal.getName();
+
+        orderService.updateStatus(id, OrderStatus.CANCELLED , currentUsername);
+
+        return "redirect:/orders/employee/my";
+    }
+
+
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/employee/{id}")
     public String getAllOrdersByEmployee(@PathVariable("id") Long id, Model model){
         List<OrderDTO> orders = orderService.getOrdersByEmployee(id);
         model.addAttribute("orders", orders);
         return "orders";
     }
+
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    @GetMapping("/{id}")
+    public String getOrderByClient(@PathVariable("id") Long id, Model model){
+        List<OrderDTO> orders = orderService.getOrdersByClient(id);
+        model.addAttribute("orders", orders);
+        return "orders";
+    }
+
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN', 'CLIENT')")
+    @GetMapping("/{id}/details")
+    public String getOrderDetails(@PathVariable("id") Long id, Model model,  Principal principal, Authentication authentication) {
+        OrderDTO order = orderService.getOrderById(id);
+        String currentUsername = principal.getName();
+        boolean isAdminOrEmployee = authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")
+                        || role.getAuthority().equals("ROLE_EMPLOYEE"));
+
+        if (!isAdminOrEmployee && !currentUsername.equals(order.getClientEmail())) {
+            throw new AccessDeniedException("Ви не маєте права переглядати це замовлення");
+        }
+
+        model.addAttribute("order", order);
+        return "order-details";
+    }
+
+
+    @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/add")
     public String addOrder(@Valid @ModelAttribute("orderDTO") OrderDTO orderDTO, BindingResult result, Principal principal){
         if (result.hasErrors()) {
@@ -50,4 +137,5 @@ public class OrderController {
         orderService.addOrder(orderDTO, principal.getName());
         return "redirect:/orders/basket";
     }
+
 }
