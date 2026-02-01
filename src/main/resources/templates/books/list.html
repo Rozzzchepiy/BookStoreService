@@ -2,50 +2,165 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{layout :: headerFiles}"></head>
-<body class="d-flex flex-column min-vh-100" >
+<body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{layout :: navbar}"></nav>
 
-<div class="container mt-4 flex-grow-1">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Каталог книг</h2>
-    <a sec:authorize="hasRole('EMPLOYEE')" href="/books/add" class="btn btn-success">
-      + Додати книгу
-    </a>
-  </div>
+<div class="container flex-grow-1">
 
-  <div th:if="${books.isEmpty()}" class="alert alert-info">
-    На жаль, на цей час книг немає в наявності.
-  </div>
+  <form th:action="@{/books}" method="get" id="filterForm">
 
-  <div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col" th:each="book : ${books}">
-      <div class="card h-100 shadow-sm">
+    <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">
+    <input type="hidden" name="size" th:value="${size}"> <div class="row">
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white fw-bold">Фільтри</div>
         <div class="card-body">
-          <h5 class="card-title" th:text="${book.name}">Назва книги</h5>
-          <h6 class="card-subtitle mb-2 text-muted" th:text="${book.author}">Автор</h6>
-          <p class="card-text">
-            <span class="badge bg-primary" th:text="${book.genre}">Жанр</span>
-            <span class="badge bg-secondary" th:text="${book.ageGroup}">Вік</span>
-          </p>
-          <h4 class="text-success mt-3" th:text="${book.price} + ' грн.'">0.00 грн.</h4>
-        </div>
-        <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
-          <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm">Деталі</a>
 
-          <div sec:authorize="hasRole('EMPLOYEE')" class="btn-group">
-            <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm">Edit</a>
-            <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"
-                  onsubmit="return confirm('Ви впевнені, що хочете видалити цю книгу?');" style="display:inline;">
-              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
+          <div class="mb-3">
+            <h6 class="fw-bold">Мова</h6>
+            <div th:each="lang : ${allLanguages}" class="form-check">
+              <input class="form-check-input" type="checkbox" name="languages"
+                     th:value="${lang}"
+                     th:checked="${selectedLanguages != null and #lists.contains(selectedLanguages, lang)}"
+                     > <label class="form-check-label" th:text="${lang}">UA</label>
+            </div>
           </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold">Жанр</h6>
+            <div class="d-flex flex-wrap gap-1">
+              <div th:each="g : ${allGenres}" class="form-check w-100">
+                <input class="form-check-input" type="checkbox" name="genres"
+                       th:value="${g}"
+                       th:checked="${selectedGenres != null and #lists.contains(selectedGenres, g)}">
+                <label class="form-check-label" th:text="${g}">Fantasy</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold">Автор</h6>
+            <div style="max-height: 150px; overflow-y: auto;">
+              <div th:each="a : ${allAuthors}" class="form-check">
+                <input class="form-check-input" type="checkbox" name="authors"
+                       th:value="${a}"
+                       th:checked="${selectedAuthors != null and #lists.contains(selectedAuthors, a)}">
+                <label class="form-check-label" th:text="${a}">Rowling</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold">Ціна (грн)</h6>
+            <div class="input-group input-group-sm mb-2">
+              <span class="input-group-text">від</span>
+              <input type="number" class="form-control" name="minPrice" th:value="${minPrice}" min="0">
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">до</span>
+              <input type="number" class="form-control" name="maxPrice" th:value="${maxPrice}" min="0">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 mt-2">Застосувати</button>
+          <a href="/books" class="btn btn-outline-secondary w-100 mt-2 btn-sm">Скинути все</a>
         </div>
       </div>
     </div>
+
+    <div class="col-lg-9">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+
+        <div class="input-group" style="max-width: 400px;">
+          <input type="text" class="form-control" name="search" placeholder="Пошук книги..." th:value="${search}">
+          <button class="btn btn-outline-primary" type="submit">
+            🔍
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <label class="text-muted small mb-0">Сортувати:</label>
+          <select class="form-select form-select-sm" name="sortField" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+            <option value="name" th:selected="${sortField == 'name'}">За назвою</option>
+            <option value="price" th:selected="${sortField == 'price'}">За ціною</option>
+            <option value="publicationDate" th:selected="${sortField == 'publicationDate'}">За новизною</option>
+          </select>
+
+          <select class="form-select form-select-sm" name="sortDir" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+            <option value="asc" th:selected="${sortDir == 'asc'}">Зростання</option>
+            <option value="desc" th:selected="${sortDir == 'desc'}">Спаданная</option>
+          </select>
+        </div>
+
+        <a sec:authorize="hasRole('EMPLOYEE')" href="/books/add" class="btn btn-success btn-sm ms-md-auto">
+          + Додати книгу
+        </a>
+      </div>
+
+      <div th:if="${books.isEmpty()}" class="alert alert-info text-center">
+        За вашим запитом нічого не знайдено 😔
+      </div>
+
+      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        <div class="col" th:each="book : ${books}">
+          <div class="card h-100 shadow-sm border-0 hover-shadow transition">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-info text-dark" th:text="${book.genre}">Fantasy</span>
+                <span class="badge border text-muted" th:text="${book.ageGroup}">TEEN</span>
+              </div>
+
+              <h5 class="card-title text-truncate" th:text="${book.name}" th:title="${book.name}">Назва</h5>
+              <p class="text-muted small mb-2" th:text="${book.author}">Автор</p>
+
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <h5 class="text-success mb-0 fw-bold" th:text="${book.price} + ' ₴'">200 ₴</h5>
+                <small class="text-muted" th:text="${book.language}">EN</small>
+              </div>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 d-flex gap-2">
+              <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm w-100">Деталі</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav th:if="${totalPages > 1}" class="mt-5">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage - 1} + ')'">←</button>
+          </li>
+
+          <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+              th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+              th:classappend="${currentPage == i} ? 'active'">
+            <button class="page-link" type="button"
+                    th:text="${i + 1}"
+                    th:onclick="'changePage(' + ${i} + ')'"></button>
+          </li>
+
+          <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+            <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage + 1} + ')'">→</button>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
   </div>
+  </form>
 </div>
 
 <footer th:replace="~{layout :: footer}"></footer>
+
+<script>
+  function changePage(page) {
+    document.getElementById('pageInput').value = page;
+    document.getElementById('filterForm').submit();
+  }
+</script>
+
 </body>
 </html>

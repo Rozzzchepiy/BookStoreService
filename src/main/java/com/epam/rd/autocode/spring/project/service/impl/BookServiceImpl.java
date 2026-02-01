@@ -4,15 +4,20 @@ import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,18 +27,37 @@ public class BookServiceImpl implements BookService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<BookDTO> getAllBooks() {
-        return bookRepository.findAll().stream()
-                .map(book -> modelMapper.map(book, BookDTO.class))
-                .collect(Collectors.toList());
+    public Page<BookDTO> getAllBooks(String search, List<String> authors, List<String> genres,
+                                     List<Language> languages, BigDecimal minPrice, BigDecimal maxPrice,
+                                     Pageable pageable) {
+
+        Specification<Book> spec = BookSpecification.filterBooks(search, authors, genres, languages, minPrice, maxPrice);
+
+        return bookRepository.findAll(spec, pageable)
+                .map(book -> modelMapper.map(book, BookDTO.class));
     }
 
     @Override
     public BookDTO getBookById(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Book not found"));
+                .orElseThrow(() -> new NotFoundException("Book not found"));
 
         return modelMapper.map(book, BookDTO.class);
+    }
+
+    @Override
+    public List<String> getAllAuthors() {
+        return bookRepository.findAllAuthors();
+    }
+
+    @Override
+    public List<String> getAllGenres() {
+        return bookRepository.findAllGenres();
+    }
+
+    @Override
+    public List<Language> getAllLanguages() {
+        return List.of(Language.values());
     }
 
     @Override
@@ -41,14 +65,14 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookDTO updateBook(Long id, BookDTO book) {
         Book updateBook = bookRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Book not found"));
+                .orElseThrow(() -> new NotFoundException("Book not found"));
 
         modelMapper.map(book, updateBook);
         updateBook.setId(id);
 
         Book updatedBook = bookRepository.save(updateBook);
 
-        return  modelMapper.map(updatedBook, BookDTO.class);
+        return modelMapper.map(updatedBook, BookDTO.class);
     }
 
     @Override
@@ -56,7 +80,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Book not found"));
+                .orElseThrow(() -> new NotFoundException("Book not found"));
         bookRepository.delete(book);
     }
 
@@ -67,6 +91,6 @@ public class BookServiceImpl implements BookService {
         Book newBook = modelMapper.map(book, Book.class);
         newBook.setId(null);
         Book updatedBook = bookRepository.save(newBook);
-        return  modelMapper.map(updatedBook, BookDTO.class);
+        return modelMapper.map(updatedBook, BookDTO.class);
     }
 }

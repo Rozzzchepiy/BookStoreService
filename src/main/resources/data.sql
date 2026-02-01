@@ -68,6 +68,15 @@ VALUES
     ('Voices in the Wind', 'Historical Fiction', 'ADULT', 500, '2017-05-15', 'William Turner', 500,'Rich historical setting', 'A compelling journey through time', 'ENGLISH'),
     ('Serenade of Souls', 'Fantasy', 'TEEN', 2000, '2013-05-15', 'Isabella Reed', 330, 'Enchanting realms','A magical fantasy filled with wonder', 'ENGLISH'),
     ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
+    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
     ('Whirlwind Romance', 'Romance', 'OTHER', 199, '2022-05-15', 'Emma Turner', 360, 'Passionate love affair','A romance that sweeps you off your feet', 'ENGLISH');
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status)
