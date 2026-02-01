@@ -1,7 +1,9 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
+import com.epam.rd.autocode.spring.project.service.BookService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -21,6 +24,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final BookService bookService;
+    private final CartController cartController;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/all")
@@ -84,12 +89,20 @@ public class OrderController {
 
     @PreAuthorize("hasRole('EMPLOYEE')")
     @PostMapping("/{id}/canceled")
-    public String canceledOrder(@PathVariable Long id, Model model, Principal principal) {
+    public String canceledOrder(@PathVariable Long id, Principal principal) {
         String currentUsername = principal.getName();
 
-        orderService.updateStatus(id, OrderStatus.CANCELLED , currentUsername);
+        orderService.refund(id, currentUsername);
 
         return "redirect:/orders/employee/my";
+    }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/{id}/client/canceled")
+    public String canceledOrderByClient(@PathVariable Long id, Principal principal) {
+        String currentUsername = principal.getName();
+        orderService.refund(id, currentUsername);
+        return "redirect:/orders/client/my";
     }
 
 
@@ -103,8 +116,8 @@ public class OrderController {
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
-    @GetMapping("/{id}")
-    public String getOrderByClient(@PathVariable("id") Long id, Model model){
+    @GetMapping("/client/{id}")
+    public String getAllOrderByClient(@PathVariable("id") Long id, Model model){
         List<OrderDTO> orders = orderService.getOrdersByClient(id);
         model.addAttribute("orders", orders);
         return "orders";
@@ -137,5 +150,55 @@ public class OrderController {
         orderService.addOrder(orderDTO, principal.getName());
         return "redirect:/orders/basket";
     }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/basket/add")
+    public String addToBasket(@RequestParam("bookId") Long bookId, @RequestParam(value = "quantity", defaultValue = "1") Integer quantity){
+        BookDTO book = bookService.getBookById(bookId);
+        cartController.addBook(book.getId(), book.getName(), book.getPrice(), quantity);
+        return "redirect:/books/" + book.getId();
+    }
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/basket/update")
+    public String updateBasketQuantity(@RequestParam("bookId") Long bookId,
+                                       @RequestParam("quantity") Integer quantity) {
+        cartController.updateQuantity(bookId, quantity);
+        return "redirect:/orders/basket";
+    }
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/basket/remove")
+    public String removeFromBasket(@RequestParam("bookId") Long bookId) {
+        cartController.removeItem(bookId);
+        return "redirect:/orders/basket";
+    }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("/basket")
+    public String showBasket(Model model) {
+        model.addAttribute("items", cartController.getItems());
+        model.addAttribute("totalPrice", cartController.getTotalPrice());
+        return "basket";
+    }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/create")
+    public String createOrder(Principal principal) {
+        if (cartController.getItems().isEmpty()) {
+            return "redirect:/orders/basket?error=empty";
+        }
+
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setBookItems(new ArrayList<>(cartController.getItems()));
+
+        try {
+            orderService.addOrder(orderDTO, principal.getName());
+            cartController.clear();
+        } catch (RuntimeException e) {
+            return "redirect:/orders/basket?error=" + e.getMessage();
+        }
+
+        return "redirect:/orders/client/my";
+    }
+
 
 }

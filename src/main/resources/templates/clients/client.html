@@ -6,28 +6,45 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container mt-5 flex-grow-1">
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h3>Інформація про клієнта</h3>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">ID:</dt>
-                <dd class="col-sm-9" th:text="${client.id}">1</dd>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-                <dt class="col-sm-3">Ім'я:</dt>
-                <dd class="col-sm-9" th:text="${client.name}">Name</dd>
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Профіль клієнта
+                    </h3>
+                </div>
 
-                <dt class="col-sm-3">Email:</dt>
-                <dd class="col-sm-9" th:text="${client.email}">Email</dd>
+                <div class="card-body">
+                    <dl class="row fs-5">
+                        <dt class="col-sm-4 text-muted">ID клієнта:</dt>
+                        <dd class="col-sm-8" th:text="${client.id}">5</dd>
 
-                <dt class="col-sm-3">Баланс:</dt>
-                <dd class="col-sm-9 text-success fw-bold" th:text="${client.balance} + ' грн.'">0.00</dd>
-            </dl>
+                        <dt class="col-sm-4 text-muted">Ім'я:</dt>
+                        <dd class="col-sm-8 fw-bold" th:text="${client.name}">Олена Петрівна</dd>
 
-            <div class="mt-3">
-                <a href="/clients" class="btn btn-secondary">← Назад до списку</a>
+                        <dt class="col-sm-4 text-muted">Email:</dt>
+                        <dd class="col-sm-8" th:text="${client.email}">client@mail.com</dd>
+
+                        <dt class="col-sm-4 text-muted">Поточний баланс:</dt>
+                        <dd class="col-sm-8 text-success fw-bold" th:text="${client.balance} + ' грн.'">1500.00 грн.</dd>
+                    </dl>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="/clients" class="btn btn-secondary">
+                            ← Назад до списку
+                        </a>
+
+                        <a th:href="@{/orders/client/{id}(id=${client.id})}" class="btn btn-primary">
+                            Історія замовлень клієнта
+                        </a>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 </div>

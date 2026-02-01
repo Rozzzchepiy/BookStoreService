@@ -50,12 +50,29 @@
                 <a href="/books" class="btn btn-secondary">← Назад до списку</a>
 
                 <span sec:authorize="hasRole('EMPLOYEE')">
-                    <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning">Редагувати</a>
-                </span>
+        <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning">Редагувати</a>
+    </span>
+                <div sec:authorize="hasRole('CLIENT')" class="mt-3">
+                    <form th:action="@{/orders/basket/add}" method="post" class="row g-3 align-items-center">
 
-                <span sec:authorize="hasRole('CLIENT')">
-                    <a href="#" class="btn btn-success">Додати в кошик</a>
-                </span>
+                        <input type="hidden" name="bookId" th:value="${book.id}">
+
+                        <div class="col-auto">
+                            <label for="quantity" class="col-form-label fw-bold">Кількість:</label>
+                        </div>
+
+                        <div class="col-auto">
+                            <input type="number" id="quantity" name="quantity"
+                                   value="1" min="1" class="form-control" style="width: 80px;">
+                        </div>
+
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-cart-plus"></i> Додати в кошик
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

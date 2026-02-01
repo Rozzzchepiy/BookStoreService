@@ -84,13 +84,25 @@
                         </button>
                     </form>
                 </div>
-                <div sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')"
+                <div sec:authorize="hasRole('EMPLOYEE')"
                      th:if="${order.status?.name() == 'ASSIGNED'}">
                     <form th:action="@{/orders/{id}/canceled(id=${order.id})}"
                           method="post"
                           class="d-inline">
                         <button class="btn btn-outline-danger btn-sm">
                             Відмінити Замовлення
+                        </button>
+                    </form>
+                </div>
+                <div sec:authorize="hasRole('CLIENT')"
+                     th:if="${order.status?.name() == 'NEW' || order.status?.name() == 'ASSIGNED'}">
+
+                    <form th:action="@{/orders/{id}/client/canceled(id=${order.id})}"
+                          method="post"
+                          class="d-inline">
+                        <button class="btn btn-danger btn-sm"
+                                onclick="return confirm('Ви впевнені, що хочете відмінити замовлення? Кошти будуть повернені.')">
+                            Відмінити
                         </button>
                     </form>
                 </div>

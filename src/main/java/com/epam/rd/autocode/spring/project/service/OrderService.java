@@ -19,4 +19,6 @@ public interface OrderService {
     OrderDTO updateStatus(Long id, OrderStatus status, String email);
 
     OrderDTO takeOrder(Long id, String currentUsername);
+
+    void refund(Long id, String currentUsername);
 }

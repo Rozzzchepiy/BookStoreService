@@ -41,6 +41,10 @@
                           onsubmit="return confirm('Ви впевнені, що хочете звільнити цього працівника?');">
                         <button type="submit" class="btn btn-sm btn-danger">Видалити</button>
                     </form>
+
+                    <a th:href="@{/employees/{id}(id=${e.id})}" class="btn btn-sm btn-primary">
+                        Деталі
+                    </a>
                 </td>
             </tr>
             </tbody>

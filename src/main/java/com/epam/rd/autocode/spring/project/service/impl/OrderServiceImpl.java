@@ -64,15 +64,10 @@ public class OrderServiceImpl implements OrderService {
         User employee = userRepository.findById(id)
                 .orElseThrow(()->new NotFoundException("Employee not found"));
 
-        if (!employee.getRoles().contains(Role.ADMIN)) {
-            throw new NotFoundException("This user is not a employee");
-        }
 
         return orderRepository.findAllByEmployee(employee).stream()
                 .map(this::mapper)
                 .collect(Collectors.toList());
-
-
     }
 
     @Override
@@ -102,21 +97,12 @@ public class OrderServiceImpl implements OrderService {
             throw new NotFoundException("This user is not a client");
         }
 
-        User employee = null;
-        if (order.getEmployeeEmail() != null){
-            employee = userRepository.findByEmail(order.getEmployeeEmail())
-                    .orElseThrow(() -> new NotFoundException("Employee not found"));
-        }
-
-        if (!employee.getRoles().contains(Role.EMPLOYEE)) {
-            throw new NotFoundException("This user is not an employee");
-        }
 
         Order newOrder = new Order();
         newOrder.setStatus(OrderStatus.NEW);
         newOrder.setOrderDate(LocalDateTime.now());
         newOrder.setClient(client);
-        newOrder.setEmployee(employee);
+        newOrder.setEmployee(null);
 
 
         List<BookItem> itemsList = new ArrayList<>();
@@ -124,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (order.getBookItems() != null){
             for (BookItemDTO bookItemDTO : order.getBookItems()) {
-                Book book = bookRepository.findByNameIgnoreCase(bookItemDTO.getBookName())
+                Book book = bookRepository.findById(bookItemDTO.getBookId())
                         .orElseThrow(() -> new NotFoundException("Book not found"));
 
                 BigDecimal itemTotal = book.getPrice().multiply(BigDecimal.valueOf(bookItemDTO.getQuantity()));
@@ -174,7 +160,8 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
         if (order.getEmployee() != null) {
-            if (!Objects.equals(order.getEmployee().getEmail(), email)) {
+
+            if (!Objects.equals(order.getEmployee().getEmail(), email) || !Objects.equals(order.getClient().getEmail(), email)) {
                 throw new AccessDeniedException("This order is no your");
             }
         }
@@ -205,6 +192,40 @@ public class OrderServiceImpl implements OrderService {
         return mapper(order);
     }
 
+    @Override
+    @Transactional
+    public void refund(Long id, String currentUsername) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        User currentUser = userRepository.findByEmail(currentUsername)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (currentUser.getRoles().contains(Role.CLIENT)) {
+            if (!order.getClient().getEmail().equals(currentUsername)) {
+                throw new org.springframework.security.access.AccessDeniedException("Ви не можете скасувати чуже замовлення");
+            }
+        }
+
+        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Замовлення не можна скасувати, оскільки воно вже виконане або скасоване");
+        }
+
+        BigDecimal refundAmount = order.getPrice();
+
+        var profile = order.getClient().getClientProfile();
+
+        BigDecimal currentBalance = profile.getBalance();
+        BigDecimal newBalance = currentBalance.add(refundAmount);
+
+        profile.setBalance(newBalance);
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+        userRepository.save(currentUser);
+        orderRepository.save(order);
+    }
+
     private OrderDTO mapper (Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderDate(order.getOrderDate());
@@ -219,7 +240,7 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setStatus(order.getStatus());
 
         List<BookItemDTO> items =order.getBookItems().stream()
-                .map(item -> new BookItemDTO(item.getBook().getName(), item.getQuantity()))
+                .map(item -> new BookItemDTO(item.getBook().getId(), item.getBook().getName(), item.getQuantity(), item.getBook().getPrice()))
                 .collect(Collectors.toList());
 
         orderDTO.setBookItems(items);
