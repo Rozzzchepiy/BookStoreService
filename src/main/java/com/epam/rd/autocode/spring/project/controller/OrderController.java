@@ -5,6 +5,7 @@ import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
+import com.epam.rd.autocode.spring.project.service.impl.CartComponent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,7 +26,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final BookService bookService;
-    private final CartController cartController;
+    private final CartComponent cart;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/all")
@@ -155,44 +156,44 @@ public class OrderController {
     @PostMapping("/basket/add")
     public String addToBasket(@RequestParam("bookId") Long bookId, @RequestParam(value = "quantity", defaultValue = "1") Integer quantity){
         BookDTO book = bookService.getBookById(bookId);
-        cartController.addBook(book.getId(), book.getName(), book.getPrice(), quantity);
+        cart.addBook(book.getId(), book.getName(), book.getPrice(), quantity);
         return "redirect:/books/" + book.getId();
     }
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/update")
     public String updateBasketQuantity(@RequestParam("bookId") Long bookId,
                                        @RequestParam("quantity") Integer quantity) {
-        cartController.updateQuantity(bookId, quantity);
+        cart.updateQuantity(bookId, quantity);
         return "redirect:/orders/basket";
     }
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/remove")
     public String removeFromBasket(@RequestParam("bookId") Long bookId) {
-        cartController.removeItem(bookId);
+        cart.removeItem(bookId);
         return "redirect:/orders/basket";
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/basket")
     public String showBasket(Model model) {
-        model.addAttribute("items", cartController.getItems());
-        model.addAttribute("totalPrice", cartController.getTotalPrice());
+        model.addAttribute("items", cart.getItems());
+        model.addAttribute("totalPrice", cart.getTotalPrice());
         return "basket";
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
     public String createOrder(Principal principal) {
-        if (cartController.getItems().isEmpty()) {
+        if (cart.getItems().isEmpty()) {
             return "redirect:/orders/basket?error=empty";
         }
 
         OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setBookItems(new ArrayList<>(cartController.getItems()));
+        orderDTO.setBookItems(new ArrayList<>(cart.getItems()));
 
         try {
             orderService.addOrder(orderDTO, principal.getName());
-            cartController.clear();
+            cart.clear();
         } catch (RuntimeException e) {
             return "redirect:/orders/basket?error=" + e.getMessage();
         }

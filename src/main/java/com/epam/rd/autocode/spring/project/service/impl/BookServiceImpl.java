@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
@@ -36,6 +37,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public BookDTO updateBook(Long id, BookDTO book) {
         Book updateBook = bookRepository.findById(id)
@@ -50,6 +52,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
@@ -58,6 +61,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public BookDTO addBook(BookDTO book) {
         Book newBook = modelMapper.map(book, Book.class);

@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
@@ -47,6 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public EmployeeDTO updateEmployee(Long id, EmployeeDTO employee) {
         User user = userRepository.findById(id)
@@ -75,6 +77,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public void deleteEmployee(Long id) {
         User employee =  userRepository.findById(id)
@@ -83,6 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
         if(userRepository.findByEmail(employee.getEmail()).isPresent()){

@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
@@ -56,6 +57,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public ClientDTO updateClient(Long id, ClientDTO client) {
         User user = userRepository.findById(id).orElseThrow(()-> new NotFoundException("Client not found"));
@@ -81,6 +83,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public void deleteClient(Long id) {
         User user =  userRepository.findById(id)
@@ -89,6 +92,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public ClientDTO addClient(ClientDTO client) {
         if (userRepository.findByEmail(client.getEmail()).isPresent()) {

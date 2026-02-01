@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
@@ -85,9 +86,8 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-
-
     @Override
+    @Loggable
     @Transactional
     public OrderDTO addOrder(OrderDTO order, String email) {
 
@@ -155,15 +155,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
+    @Transactional
     public OrderDTO updateStatus(Long id, OrderStatus status, String email) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
-        if (order.getEmployee() != null) {
+        boolean isEmployee = order.getEmployee() != null && Objects.equals(order.getEmployee().getEmail(), email);
+        boolean isClient = Objects.equals(order.getClient().getEmail(), email);
 
-            if (!Objects.equals(order.getEmployee().getEmail(), email) || !Objects.equals(order.getClient().getEmail(), email)) {
-                throw new AccessDeniedException("This order is no your");
-            }
+        if (!isEmployee && !isClient) {
+            throw new AccessDeniedException("This order is not yours");
         }
         if (status == OrderStatus.NEW) {
             order.setEmployee(null);
@@ -174,6 +176,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
+    @Transactional
     public OrderDTO takeOrder(Long id, String currentUsername) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -193,6 +197,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     @Transactional
     public void refund(Long id, String currentUsername) {
         Order order = orderRepository.findById(id)

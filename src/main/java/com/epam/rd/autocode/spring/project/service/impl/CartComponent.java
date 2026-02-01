@@ -1,14 +1,8 @@
-package com.epam.rd.autocode.spring.project.controller;
+package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
-import com.epam.rd.autocode.spring.project.service.BookService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import java.math.BigDecimal;
@@ -17,10 +11,11 @@ import java.util.List;
 
 @Component
 @SessionAttributes("cart")
-public class CartController {
+public class CartComponent {
 
     private List<BookItemDTO> bookItemDTOList =  new ArrayList<>();
 
+    @Loggable
     public void addBook(Long bookId, String bookName, BigDecimal price, Integer quantity) {
         for (BookItemDTO item : bookItemDTOList) {
             if (item.getBookId().equals(bookId)) {
@@ -39,6 +34,7 @@ public class CartController {
         bookItemDTOList.clear();
     }
 
+
     public BigDecimal getTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (BookItemDTO bookItemDTO : bookItemDTOList) {
@@ -48,6 +44,7 @@ public class CartController {
         return totalPrice;
     }
 
+    @Loggable
     public void updateQuantity(Long bookId, Integer newQuantity) {
         if (newQuantity <= 0) {
             removeItem(bookId);
@@ -62,6 +59,7 @@ public class CartController {
         }
     }
 
+    @Loggable
     public void removeItem(Long bookId) {
         bookItemDTOList.removeIf(item -> item.getBookId().equals(bookId));
     }
