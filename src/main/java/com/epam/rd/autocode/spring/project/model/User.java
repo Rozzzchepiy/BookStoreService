@@ -3,6 +3,7 @@ package com.epam.rd.autocode.spring.project.model;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -13,6 +14,7 @@ import java.util.Set;
 @Table(name = "users")
 @Data
 @ToString(exclude = {"clientProfile", "employeeProfile"})
+@EqualsAndHashCode(exclude = {"clientProfile", "employeeProfile"})
 @NoArgsConstructor
 public class User {
 

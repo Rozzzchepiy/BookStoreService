@@ -1,13 +1,13 @@
 package com.epam.rd.autocode.spring.project.controller;
 
-import com.epam.rd.autocode.spring.project.dto.BookDTO;
+import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.service.CartService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
-import com.epam.rd.autocode.spring.project.component.CartComponent;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final BookService bookService;
-    private final CartComponent cart;
+    private final CartService cartService;
     private final UserRepository userRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -294,46 +294,72 @@ public class OrderController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/add")
-    public String addToBasket(@RequestParam("bookId") Long bookId, @RequestParam(value = "quantity", defaultValue = "1") Integer quantity){
-        BookDTO book = bookService.getBookById(bookId);
-        cart.addBook(book.getId(), book.getName(), book.getPrice(), quantity);
-        return "redirect:/books/" + book.getId();
+    public String addToBasket(@RequestParam("bookId") Long bookId,
+                              @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
+                              Principal principal) {
+        cartService.addItemToCart(principal.getName(), bookId, quantity);
+        return "redirect:/books/" + bookId;
     }
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/update")
     public String updateBasketQuantity(@RequestParam("bookId") Long bookId,
-                                       @RequestParam("quantity") Integer quantity) {
-        cart.updateQuantity(bookId, quantity);
-        return "redirect:/orders/basket";
+                                       @RequestParam("quantity") Integer quantity,
+                                       @RequestParam(value = "page", defaultValue = "0") int page,
+                                       @RequestParam(value = "size", defaultValue = "5") int size,
+                                       Principal principal) {
+        cartService.updateQuantity(principal.getName(), bookId, quantity);
+        return "redirect:/orders/basket?page=" + page + "&size=" + size;
     }
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/remove")
-    public String removeFromBasket(@RequestParam("bookId") Long bookId) {
-        cart.removeItem(bookId);
-        return "redirect:/orders/basket";
+    public String removeFromBasket(@RequestParam("bookId") Long bookId, Principal principal, @RequestParam(value = "page", defaultValue = "0") int page,
+                                   @RequestParam(value = "size", defaultValue = "5") int size) {
+        cartService.removeItem(principal.getName(), bookId);
+        return "redirect:/orders/basket?page=" + page + "&size=" + size;
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/basket")
-    public String showBasket(Model model) {
-        model.addAttribute("items", cart.getItems());
-        model.addAttribute("totalPrice", cart.getTotalPrice());
+    public String showBasket(
+            Model model,
+            Principal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        String email = principal.getName();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<BookItemDTO> cartPage = cartService.getCartItems(email, pageable);
+        BigDecimal totalPrice = cartService.getTotalPrice(email);
+
+        model.addAttribute("items", cartPage.getContent());
+        model.addAttribute("totalPrice", totalPrice);
+
+        model.addAttribute("currentPage", cartPage.getNumber());
+        model.addAttribute("totalPages", cartPage.getTotalPages());
+        model.addAttribute("totalItems", cartPage.getTotalElements());
+        model.addAttribute("size", size);
+
         return "basket";
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
     public String createOrder(Principal principal) {
-        if (cart.getItems().isEmpty()) {
+        String email = principal.getName();
+
+        List<BookItemDTO> allItems = cartService.getAllCartItems(email);
+
+        if (allItems.isEmpty()) {
             return "redirect:/orders/basket?error=empty";
         }
 
         OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setBookItems(new ArrayList<>(cart.getItems()));
+        orderDTO.setBookItems(new ArrayList<>(allItems));
 
         try {
-            orderService.addOrder(orderDTO, principal.getName());
-            cart.clear();
+            orderService.addOrder(orderDTO, email);
+            cartService.clearCart(email);
         } catch (RuntimeException e) {
             return "redirect:/orders/basket?error=" + e.getMessage();
         }

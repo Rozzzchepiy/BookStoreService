@@ -99,7 +99,13 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success" th:text="#{form.btn.save}">Зберегти книгу</button>
-                            <a href="/books" class="btn btn-secondary" th:text="#{form.btn.cancel}">Скасувати</a>
+                            <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                Скасувати
+                            </button>
+
+                            <a href="#" onclick="history.back(); return false;" class="btn btn-secondary">
+                                Скасувати
+                            </a>
                         </div>
                     </form>
                 </div>

@@ -4,8 +4,10 @@ import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +17,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -24,6 +28,7 @@ import java.util.List;
 @RequestMapping("/books")
 public class BookController {
     private final BookService bookService;
+    private final CartService cartService;
 
     @GetMapping
     public String showAllBooks(
@@ -76,9 +81,20 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public String getBookDetails(@PathVariable("id") Long id, Model model){
+    public String getBookDetails(@PathVariable("id") Long id, Model model, Principal principal){
         var book = bookService.getBookById(id);
         model.addAttribute("book",book);
+        boolean isBookInCart = false;
+        if (principal != null) {
+            try {
+                isBookInCart = cartService.isBookInCart(principal.getName(), id);
+            } catch (Exception e) {
+                isBookInCart = false;
+            }
+        }
+
+        model.addAttribute("isBookInCart", isBookInCart);
+
         return "books/details";
     }
 
@@ -109,9 +125,15 @@ public class BookController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/delete/{id}")
-    public String deleteBook(@PathVariable("id") Long id){
-        bookService.deleteBook(id);
-        return "redirect:/books";
+    public String deleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes){
+        try {
+            bookService.deleteBook(id);
+            redirectAttributes.addFlashAttribute("successMessage", "book.delete.success");
+            return "redirect:/books";
+        } catch (DataIntegrityViolationException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "book.delete.error.integrity");
+            return "redirect:/books/" + id;
+        }
     }
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")

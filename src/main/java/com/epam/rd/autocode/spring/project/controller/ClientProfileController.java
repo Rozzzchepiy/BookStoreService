@@ -47,9 +47,13 @@ public class ClientProfileController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/topup")
-    public String topUpBalance(@RequestParam("amount") BigDecimal amount,
+    public String topUpBalance(@RequestParam(value="amount", required = false) BigDecimal amount,
                                Principal principal,
                                Model model) {
+        if (amount == null) {
+            model.addAttribute("error", "validation.required");
+            return "profile/topup";
+        }
         try {
             clientService.topUpBalance(principal.getName(), amount);
         } catch (IllegalArgumentException e) {

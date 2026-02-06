@@ -42,10 +42,13 @@
             </div>
 
             <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-success btn-lg" th:text="#{topup.btn_submit}">
-                Поповнити баланс
+              <button type="button" class="btn btn-secondary" onclick="history.back()">
+                Скасувати
               </button>
-              <a href="/profile" class="btn btn-outline-secondary" th:text="#{topup.btn_cancel}">Скасувати</a>
+
+              <a href="#" onclick="history.back(); return false;" class="btn btn-secondary">
+                Скасувати
+              </a>
             </div>
           </form>
 

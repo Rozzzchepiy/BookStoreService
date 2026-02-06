@@ -7,7 +7,10 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container flex-grow-1">
-
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="#{${successMessage}}">Успіх</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
   <form th:action="@{/books}" method="get" id="filterForm">
 
     <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">

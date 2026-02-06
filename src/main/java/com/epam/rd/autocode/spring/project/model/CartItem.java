@@ -1,16 +1,15 @@
 package com.epam.rd.autocode.spring.project.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "cart_items")
 @Data
+@ToString(exclude = {"user", "book"})
+@EqualsAndHashCode(exclude = {"user", "book"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItem {

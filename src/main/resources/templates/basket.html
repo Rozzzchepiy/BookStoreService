@@ -4,7 +4,7 @@
 <body class="d-flex flex-column min-vh-100">
 <nav th:replace="~{layout :: navbar}"></nav>
 
-<div class="container mt-5, flex-grow-1">
+<div class="container mt-5 flex-grow-1">
   <h2 th:text="#{cart.title}">Ваш кошик</h2>
 
   <div th:if="${param.error}" class="alert alert-danger">
@@ -30,7 +30,9 @@
       </thead>
       <tbody>
       <tr th:each="item : ${items}">
-        <td th:text="${item.bookName}">Назва</td>
+        <td>
+          <a th:href="@{/books/{id}(id=${item.bookId})}" th:text="${item.bookName}" class="text-decoration-none text-dark fw-bold">Назва</a>
+        </td>
         <td th:text="${item.price} + ' ' + #{nav.currency}">Ціна</td>
 
         <td class="text-center">
@@ -39,6 +41,10 @@
             <form th:action="@{/orders/basket/update}" method="post" style="display:inline;">
               <input type="hidden" name="bookId" th:value="${item.bookId}">
               <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
+
+              <input type="hidden" name="page" th:value="${currentPage}">
+              <input type="hidden" name="size" th:value="${size}">
+
               <button type="submit" class="btn btn-outline-secondary btn-sm">-</button>
             </form>
 
@@ -48,6 +54,10 @@
             <form th:action="@{/orders/basket/update}" method="post" style="display:inline;">
               <input type="hidden" name="bookId" th:value="${item.bookId}">
               <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
+
+              <input type="hidden" name="page" th:value="${currentPage}">
+              <input type="hidden" name="size" th:value="${size}">
+
               <button type="submit" class="btn btn-outline-secondary btn-sm">+</button>
             </form>
           </div>
@@ -58,6 +68,10 @@
         <td>
           <form th:action="@{/orders/basket/remove}" method="post">
             <input type="hidden" name="bookId" th:value="${item.bookId}">
+
+            <input type="hidden" name="page" th:value="${currentPage}">
+            <input type="hidden" name="size" th:value="${size}">
+
             <button type="submit" class="btn btn-danger btn-sm" th:text="#{cart.btn.remove}">Видалити</button>
           </form>
         </td>
@@ -65,8 +79,39 @@
       </tbody>
     </table>
 
+    <nav aria-label="Page navigation" class="mt-4" th:if="${totalPages > 1}">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/orders/basket(page=${currentPage - 1}, size=${size})}"
+             aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${i == currentPage} ? 'active'">
+          <a class="page-link"
+             th:href="@{/orders/basket(page=${i}, size=${size})}"
+             th:text="${i + 1}">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/orders/basket(page=${currentPage + 1}, size=${size})}"
+             aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
     <div class="d-flex justify-content-end align-items-center mt-4">
-      <h4 class="me-4"><span th:text="#{cart.total}">Разом:</span> <span class="text-success" th:text="${totalPrice} + ' ' + #{nav.currency}">0.00 грн</span></h4>
+      <h4 class="me-4">
+        <span th:text="#{cart.total}">Разом:</span>
+        <span class="text-success" th:text="${totalPrice} + ' ' + #{nav.currency}">0.00 грн</span>
+      </h4>
 
       <form th:action="@{/orders/create}" method="post">
         <button type="submit" class="btn btn-primary btn-lg" th:text="#{cart.btn.checkout}">Оформити замовлення</button>

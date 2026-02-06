@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 @Table(name = "client_profiles")
 @NoArgsConstructor
 @Data
+@ToString(exclude = "user")
+@EqualsAndHashCode(exclude = "user")
 public class ClientProfile {
 
     @Id
