@@ -1,16 +1,18 @@
-package com.epam.rd.autocode.spring.project.service.impl;
+package com.epam.rd.autocode.spring.project.component;
 
 import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-@SessionAttributes("cart")
+@Component("cartComponent")
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class CartComponent {
 
     private List<BookItemDTO> bookItemDTOList =  new ArrayList<>();
@@ -63,5 +65,11 @@ public class CartComponent {
     public void removeItem(Long bookId) {
         bookItemDTOList.removeIf(item -> item.getBookId().equals(bookId));
     }
-
+    public boolean isBookInCart(Long bookId) {
+        if (bookItemDTOList == null || bookItemDTOList.isEmpty()) {
+            return false;
+        }
+        return bookItemDTOList.stream()
+                .anyMatch(item -> item.getBookId().equals(bookId));
+    }
 }

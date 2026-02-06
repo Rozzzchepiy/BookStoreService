@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,6 +116,19 @@ public class ClientServiceImpl implements ClientService {
         User savedUser = userRepository.save(newUser);
 
         return mapper(savedUser);
+    }
+
+    @Override
+    @Loggable
+    @Transactional
+    public void topUpBalance(String email, BigDecimal amount) {
+        User user =  userRepository.findByEmail(email)
+                .orElseThrow(()-> new NotFoundException("User not found"));
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Сума поповнення має бути додатною");
+        }
+        user.getClientProfile().setBalance(user.getClientProfile().getBalance().add(amount));
+        userRepository.save(user);
     }
 
     private ClientDTO mapper(User user) {

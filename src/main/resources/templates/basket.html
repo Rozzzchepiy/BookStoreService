@@ -5,32 +5,33 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container mt-5, flex-grow-1">
-  <h2>Ваш кошик</h2>
+  <h2 th:text="#{cart.title}">Ваш кошик</h2>
 
   <div th:if="${param.error}" class="alert alert-danger">
-    <span th:if="${param.error[0] == 'empty'}">Кошик порожній!</span>
+    <span th:if="${param.error[0] == 'empty'}" th:text="#{cart.empty}">Кошик порожній!</span>
     <span th:unless="${param.error[0] == 'empty'}" th:text="${param.error}">Помилка</span>
   </div>
 
   <div th:if="${items.isEmpty()}" class="alert alert-info">
-    Ваш кошик порожній. <a href="/books">Перейти до покупок</a>
+    <span th:text="#{cart.msg_empty}">Ваш кошик порожній.</span>
+    <a href="/books" th:text="#{cart.link_shop}">Перейти до покупок</a>
   </div>
 
   <div th:if="${!items.isEmpty()}">
     <table class="table align-middle">
       <thead class="table-light">
       <tr>
-        <th>Назва книги</th>
-        <th>Ціна</th>
-        <th class="text-center">Кількість</th>
-        <th>Сума</th>
-        <th>Дії</th>
+        <th th:text="#{cart.col.book}">Назва книги</th>
+        <th th:text="#{cart.col.price}">Ціна</th>
+        <th class="text-center" th:text="#{cart.col.quantity}">Кількість</th>
+        <th th:text="#{cart.col.sum}">Сума</th>
+        <th th:text="#{cart.col.actions}">Дії</th>
       </tr>
       </thead>
       <tbody>
       <tr th:each="item : ${items}">
         <td th:text="${item.bookName}">Назва</td>
-        <td th:text="${item.price} + ' грн'">Ціна</td>
+        <td th:text="${item.price} + ' ' + #{nav.currency}">Ціна</td>
 
         <td class="text-center">
           <div class="btn-group" role="group">
@@ -52,12 +53,12 @@
           </div>
         </td>
 
-        <td th:text="${item.price * item.quantity} + ' грн'">Сума</td>
+        <td th:text="${item.price * item.quantity} + ' ' + #{nav.currency}">Сума</td>
 
         <td>
           <form th:action="@{/orders/basket/remove}" method="post">
             <input type="hidden" name="bookId" th:value="${item.bookId}">
-            <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+            <button type="submit" class="btn btn-danger btn-sm" th:text="#{cart.btn.remove}">Видалити</button>
           </form>
         </td>
       </tr>
@@ -65,15 +66,15 @@
     </table>
 
     <div class="d-flex justify-content-end align-items-center mt-4">
-      <h4 class="me-4">Разом: <span class="text-success" th:text="${totalPrice} + ' грн'">0.00 грн</span></h4>
+      <h4 class="me-4"><span th:text="#{cart.total}">Разом:</span> <span class="text-success" th:text="${totalPrice} + ' ' + #{nav.currency}">0.00 грн</span></h4>
 
       <form th:action="@{/orders/create}" method="post">
-        <button type="submit" class="btn btn-primary btn-lg">Оформити замовлення</button>
+        <button type="submit" class="btn btn-primary btn-lg" th:text="#{cart.btn.checkout}">Оформити замовлення</button>
       </form>
     </div>
 
     <div class="mt-3">
-      <a href="/books" class="btn btn-link">← Продовжити покупки</a>
+      <a href="/books" class="btn btn-link" th:text="#{cart.link.continue}">← Продовжити покупки</a>
     </div>
   </div>
 </div>

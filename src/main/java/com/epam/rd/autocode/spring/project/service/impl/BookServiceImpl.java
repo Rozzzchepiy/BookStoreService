@@ -4,9 +4,11 @@ import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.spec.BookSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,10 +30,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookDTO> getAllBooks(String search, List<String> authors, List<String> genres,
-                                     List<Language> languages, BigDecimal minPrice, BigDecimal maxPrice,
+                                     List<Language> languages, List<AgeGroup> ageGroups,BigDecimal minPrice, BigDecimal maxPrice,
                                      Pageable pageable) {
 
-        Specification<Book> spec = BookSpecification.filterBooks(search, authors, genres, languages, minPrice, maxPrice);
+        Specification<Book> spec = BookSpecification.filterBooks(search, authors, genres, languages, ageGroups, minPrice, maxPrice);
 
         return bookRepository.findAll(spec, pageable)
                 .map(book -> modelMapper.map(book, BookDTO.class));
@@ -58,6 +60,11 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Language> getAllLanguages() {
         return List.of(Language.values());
+    }
+
+    @Override
+    public List<AgeGroup> getAllAgeGroups() {
+        return List.of(AgeGroup.values());
     }
 
     @Override

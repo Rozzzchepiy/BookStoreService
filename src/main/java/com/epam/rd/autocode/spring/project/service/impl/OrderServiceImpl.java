@@ -14,12 +14,17 @@ import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.OrderService;
+import com.epam.rd.autocode.spring.project.spec.OrderSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,6 +201,8 @@ public class OrderServiceImpl implements OrderService {
         return mapper(order);
     }
 
+
+
     @Override
     @Loggable
     @Transactional
@@ -231,6 +238,38 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+    @Override
+    @Loggable
+    @Transactional
+    public void deliver(Long id, String currentUsername) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        User user = userRepository.findByEmail(currentUsername).orElseThrow(() -> new NotFoundException("User not found"));
+
+        System.out.println("ORDER Employee ID: " + order.getEmployee().getId());
+        System.out.println("CURRENT USER Employee ID: " + user.getEmployeeProfile().getId());
+
+        if (!order.getEmployee().getId().equals(user.getId())) {
+            throw new AccessDeniedException("error.order.access_denied");
+        }
+
+
+        order.setStatus(OrderStatus.DELIVERED);
+        orderRepository.save(order);
+    }
+
+    @Override
+    public Page<OrderDTO> getFilteredOrders(Long clientId, Long employeeId, String search, List<OrderStatus> statuses, LocalDate dateFrom, LocalDate dateTo, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.filterOrders(
+                clientId, employeeId, search, statuses, dateFrom, dateTo, minPrice, maxPrice
+        );
+
+        return orderRepository.findAll(spec, pageable)
+                .map(this::mapper);
+    }
+
+
     private OrderDTO mapper (Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderDate(order.getOrderDate());
@@ -251,5 +290,7 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setBookItems(items);
         return orderDTO;
     }
+
+
 
 }

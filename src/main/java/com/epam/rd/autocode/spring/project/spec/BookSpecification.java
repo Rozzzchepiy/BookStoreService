@@ -1,6 +1,7 @@
-package com.epam.rd.autocode.spring.project.service.impl;
+package com.epam.rd.autocode.spring.project.spec;
 
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
@@ -12,7 +13,7 @@ import java.util.List;
 public class BookSpecification {
 
     public static Specification<Book> filterBooks(String search, List<String> authors, List<String> genres,
-                                                  List<Language> languages, BigDecimal minPrice, BigDecimal maxPrice) {
+                                                  List<Language> languages, List<AgeGroup> ageGroups, BigDecimal minPrice, BigDecimal maxPrice) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -30,6 +31,10 @@ public class BookSpecification {
 
             if (genres != null && !genres.isEmpty()) {
                 predicates.add(root.get("genre").in(genres));
+            }
+
+            if (ageGroups != null && !ageGroups.isEmpty()) {
+                predicates.add(root.get("ageGroup").in(ageGroups));
             }
 
             if (languages != null && !languages.isEmpty()) {

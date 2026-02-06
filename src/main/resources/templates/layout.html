@@ -4,16 +4,15 @@
 
 <head th:fragment="headerFiles">
     <meta charset="UTF-8">
-    <title>Book Store</title>
+    <title th:text="#{nav.title}">Book Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" th:fragment="navbar">
     <div class="container">
-        <a class="navbar-brand" href="/books">BookStore</a>
+        <a class="navbar-brand" href="/books" th:text="#{nav.brand}">BookStore</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
@@ -22,59 +21,82 @@
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="/books">Книги</a>
+                    <a class="nav-link" href="/books" th:text="#{nav.books}">Книги</a>
                 </li>
 
                 <li class="nav-item" sec:authorize="hasRole('CLIENT')">
-                    <a class="nav-link" href="/orders/basket">Кошик</a>
+                    <a class="nav-link" href="/orders/basket" th:text="#{nav.cart}">Кошик</a>
                 </li>
 
                 <li class="nav-item" sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')">
-                    <a class="nav-link text-warning" href="/books/add">Додати книгу</a>
+                    <a class="nav-link text-warning" href="/books/add" th:text="#{nav.add_book}">Додати книгу</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN')">
-                    <a class="nav-link" href="/clients">Клієнти</a>
+                    <a class="nav-link" href="/clients" th:text="#{nav.clients}">Клієнти</a>
                 </li>
                 <li sec:authorize="hasRole('EMPLOYEE')">
-                    <a class="nav-link" href="/orders/employee/my">Мої замовлення</a>
+                    <a class="nav-link" href="/orders/employee/my" th:text="#{nav.my_orders}">Мої замовлення</a>
                 </li>
-
                 <li sec:authorize="hasRole('EMPLOYEE')">
-                    <a class="nav-link" href="/orders/available">Нові замовлення</a>
+                    <a class="nav-link" href="/orders/available" th:text="#{nav.new_orders}">Нові замовлення</a>
                 </li>
-
                 <li sec:authorize="hasRole('CLIENT')">
-                    <a class="nav-link" href="/orders/client/my">Мої замовлення</a>
+                    <a class="nav-link" href="/orders/client/my" th:text="#{nav.my_orders}">Мої замовлення</a>
                 </li>
-
                 <li sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" href="/orders/admin/all">Всі замовлення</a>
+                    <a class="nav-link" href="/orders/admin/all" th:text="#{nav.all_orders}">Всі замовлення</a>
                 </li>
-
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" href="/employees">Працівники</a>
+                    <a class="nav-link" href="/employees" th:text="#{nav.employees}">Працівники</a>
                 </li>
             </ul>
 
-            <div class="d-flex">
-                <div sec:authorize="!isAuthenticated()">
-                    <a href="/login" class="btn btn-outline-light me-2">Вхід</a>
-                    <a href="/client/register" class="btn btn-warning">Реєстрація</a>
-                </div>
-
-                <div sec:authorize="isAuthenticated()" class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <span sec:authentication="name">User</span>
+            <div class="d-flex align-items-center">
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        🌐 <span th:text="${#locale.language == 'uk' ? 'UA' : 'EN'}">UA</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/profile">Мій профіль</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form th:action="@{/logout}" method="post" class="m-0">
-                                <button type="submit" class="dropdown-item text-danger">Вихід</button>
-                            </form>
-                        </li>
+                        <li><a class="dropdown-item" th:href="@{''(lang='uk')}">🇺🇦 Українська</a></li>
+                        <li><a class="dropdown-item" th:href="@{''(lang='en')}">🇬🇧 English</a></li>
                     </ul>
+                </div>
+
+                <div sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light me-2" th:text="#{nav.login}">Вхід</a>
+                    <a href="/client/register" class="btn btn-warning" th:text="#{nav.register}">Реєстрація</a>
+                </div>
+
+                <div sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+
+                    <div sec:authorize="hasRole('CLIENT')" class="d-flex align-items-center text-white me-3">
+                        <span class="me-2">
+                            <span th:text="#{nav.balance}">Баланс:</span>
+                            <b th:text="${@balanceHelper.getCurrentBalance()}">0.0</b>
+                            <span th:text="#{nav.currency}">грн</span>
+                        </span>
+                        <a href="/profile/topup" class="btn btn-sm btn-success" th:text="#{nav.topup}">Поповнити</a>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <span sec:authentication="name">User</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+
+                            <li sec:authorize="hasRole('CLIENT')">
+                                <a class="dropdown-item" href="/profile" th:text="#{nav.profile}">Мій профіль</a>
+                            </li>
+
+                            <li sec:authorize="hasRole('CLIENT')"><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item text-danger" th:text="#{nav.logout}">Вихід</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,9 +106,9 @@
 <footer th:fragment="footer" class="bg-dark text-white text-center py-3 mt-5">
     <div class="container">
         <p class="mb-0">
-            &copy; 2026 BookStore Project. All rights reserved.
+            &copy; 2026 <span th:text="#{footer.rights}">BookStore Project. All rights reserved.</span>
             <br>
-            <small class="text-white-50">Designed by Yurii Rozchepii</small>
+            <small class="text-white-50" th:text="#{footer.design}">Designed by Yurii Rozchepii</small>
         </p>
     </div>
 </footer>

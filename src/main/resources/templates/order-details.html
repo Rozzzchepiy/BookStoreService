@@ -5,25 +5,25 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container flex-grow-1">
-    <h2>Деталі замовлення</h2>
+    <h2 th:text="#{order.details.title}">Деталі замовлення</h2>
 
     <div class="card mb-4">
-        <div class="card-header">Інформація</div>
+        <div class="card-header" th:text="#{order.details.info}">Інформація</div>
         <div class="card-body">
-            <p><strong>Дата:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></span></p>
-            <p><strong>Клієнт:</strong> <span th:text="${order.clientEmail}"></span></p>
-            <p><strong>Статус:</strong> <span th:text="${order.status}"></span></p>
-            <p><strong>Загальна ціна:</strong> <span th:text="${order.price} + ' грн'"></span></p>
+            <p><strong th:text="#{order.details.date}">Дата:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></span></p>
+            <p><strong th:text="#{order.details.client}">Клієнт:</strong> <span th:text="${order.clientEmail}"></span></p>
+            <p><strong th:text="#{order.details.status}">Статус:</strong> <span th:text="${order.status}"></span></p>
+            <p><strong th:text="#{order.details.total}">Загальна ціна:</strong> <span th:text="${order.price} + ' ' + #{nav.currency}"></span></p>
         </div>
     </div>
 
-    <h3>Список книг у замовленні</h3>
+    <h3 th:text="#{order.details.books_list}">Список книг у замовленні</h3>
     <table class="table table-bordered">
         <thead class="table-light">
         <tr>
-            <th>Назва книги</th>
-            <th>Кількість</th>
-            <th>Дії</th>
+            <th th:text="#{order.details.col.book}">Назва книги</th>
+            <th th:text="#{order.details.col.qty}">Кількість</th>
+            <th th:text="#{order.details.col.actions}">Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -34,17 +34,15 @@
     </table>
 
     <div sec:authorize="hasRole('EMPLOYEE')">
-        <a th:href="@{/orders/employee/my}" class="btn btn-secondary">Назад</a>
+        <a th:href="@{/orders/employee/my}" class="btn btn-secondary" th:text="#{order.details.btn.back}">Назад</a>
     </div>
     <div sec:authorize="hasRole('ADMIN')">
-        <a th:href="@{/orders/admin/all}" class="btn btn-secondary">Назад</a>
+        <a th:href="@{/orders/admin/all}" class="btn btn-secondary" th:text="#{order.details.btn.back}">Назад</a>
     </div>
 
     <div sec:authorize="hasRole('CLIENT')">
-        <a th:href="@{/orders/client/my}" class="btn btn-secondary">Назад</a>
+        <a th:href="@{/orders/client/my}" class="btn btn-secondary" th:text="#{order.details.btn.back}">Назад</a>
     </div>
-
-
 </div>
 
 <footer th:replace="~{layout :: footer}"></footer>

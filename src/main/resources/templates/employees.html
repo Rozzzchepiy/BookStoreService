@@ -7,22 +7,34 @@
 
 <div class="container mt-4 flex-grow-1">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Список працівників</h2>
+        <h2 th:text="#{employees.title}">Список працівників</h2>
         <a href="/employees/add" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Додати працівника
+            <i class="bi bi-plus-circle"></i> <span th:text="#{employees.btn.add}">Додати працівника</span>
         </a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="#{${error}}">Текст помилки</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${success}">Операція успішна</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <div class="table-responsive shadow-sm">
         <table class="table table-striped table-hover align-middle">
             <thead class="table-dark">
             <tr>
-                <th>ID</th>
-                <th>Ім'я</th>
-                <th>Email</th>
-                <th>Телефон</th>
-                <th>Дата народження</th>
-                <th>Дії</th>
+                <th th:text="#{employees.col.id}">ID</th>
+                <th th:text="#{employees.col.name}">Ім'я</th>
+                <th th:text="#{employees.col.email}">Email</th>
+                <th th:text="#{employees.col.phone}">Телефон</th>
+                <th th:text="#{employees.col.birth}">Дата народження</th>
+                <th th:text="#{employees.col.actions}">Дії</th>
             </tr>
             </thead>
             <tbody>
@@ -33,16 +45,16 @@
                 <td th:text="${e.phone}">+380...</td>
                 <td th:text="${e.birthDate}">2000-01-01</td>
                 <td>
-                    <a th:href="@{/employees/edit/{id}(id=${e.id})}" class="btn btn-sm btn-primary">
+                    <a th:href="@{/employees/edit/{id}(id=${e.id})}" class="btn btn-sm btn-primary" th:text="#{employees.btn.edit}">
                         Редагувати
                     </a>
 
                     <form th:action="@{/employees/delete/{id}(id=${e.id})}" method="post" style="display:inline;"
-                          onsubmit="return confirm('Ви впевнені, що хочете звільнити цього працівника?');">
-                        <button type="submit" class="btn btn-sm btn-danger">Видалити</button>
+                          th:attr="onsubmit='return confirm(\'' + #{employees.confirm_delete} + '\');'">
+                        <button type="submit" class="btn btn-sm btn-danger" th:text="#{employees.btn.delete}">Видалити</button>
                     </form>
 
-                    <a th:href="@{/employees/{id}(id=${e.id})}" class="btn btn-sm btn-primary">
+                    <a th:href="@{/employees/{id}(id=${e.id})}" class="btn btn-sm btn-primary" th:text="#{employees.btn.details}">
                         Деталі
                     </a>
                 </td>

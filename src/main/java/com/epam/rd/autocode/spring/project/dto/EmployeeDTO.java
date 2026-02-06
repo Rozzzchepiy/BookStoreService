@@ -11,26 +11,26 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmployeeDTO{
+public class EmployeeDTO {
     private Long id;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "{validation.required}")
+    @Email(message = "{validation.email}")
     private String email;
 
-    @NotBlank
-    @Size(min = 6, max = 25)
+    @NotBlank(message = "{validation.required}")
+    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,25}$",
+            message = "{validation.password.complexity}")
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "{validation.required}")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "{validation.required}")
     private String phone;
 
-    @NotNull
-    @Past
+    @NotNull(message = "{validation.required}")
+    @Past(message = "{validation.date.past}")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-
 }

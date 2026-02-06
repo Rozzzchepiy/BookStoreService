@@ -10,22 +10,23 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientDTO{
+public class ClientDTO {
 
     private Long id;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "{validation.required}")
+    @Email(message = "{validation.email}")
     private String email;
 
-    @NotBlank
-    @Size(min = 6, max = 25)
+    @NotBlank(message = "{validation.required}")
+    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,25}$",
+            message = "{validation.password.complexity}")
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "{validation.required}")
     private String name;
 
-    @NotNull
-    @Min(0)
+    @NotNull(message = "{validation.required}")
+    @Min(value = 0, message = "{validation.price.min}")
     private BigDecimal balance;
 }

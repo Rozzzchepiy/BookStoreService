@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: headerFiles}"></head>
+<head th:replace="~{layout :: headerFiles}">
+    <title th:text="#{login.title}">Вхід у систему</title>
+</head>
 <body class="d-flex flex-column min-vh-100">
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container mt-5 flex-grow-1">
     <div class="row justify-content-center">
         <div class="col-md-4">
-            <h3 class="text-center mb-4">Вхід у систему</h3>
+            <h3 class="text-center mb-4" th:text="#{login.header}">Вхід у систему</h3>
 
-            <div th:if="${param.error}" class="alert alert-danger">
+            <div th:if="${param.error}" class="alert alert-danger" th:text="#{login.error}">
                 Невірний email або пароль!
             </div>
 
             <form th:action="@{/login}" method="post">
                 <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="username" class="form-control" required placeholder="email@example.com">
+                    <label th:text="#{login.email_label}">Email</label>
+                    <input type="email" name="username" class="form-control" placeholder="email@example.com">
                 </div>
                 <div class="mb-3">
-                    <label>Пароль</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <label th:text="#{login.password_label}">Пароль</label>
+                    <input type="password" name="password" class="form-control">
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Увійти</button>
+                <button type="submit" class="btn btn-primary w-100" th:text="#{login.submit_btn}">Увійти</button>
             </form>
 
             <p class="text-center mt-3">
-                Немає акаунту? <a href="/client/register">Зареєструватися</a>
+                <span th:text="#{login.no_account}">Немає акаунту?</span>
+                <a href="/client/register" th:text="#{login.register_link}">Зареєструватися</a>
             </p>
         </div>
     </div>

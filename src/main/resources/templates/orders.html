@@ -1,139 +1,217 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <head th:replace="~{layout :: headerFiles}"></head>
-
 <body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container flex-grow-1">
 
-    <h2 class="mb-4"
-        th:text="${pageTitle != null ? pageTitle : 'Замовлення'}">
-        Замовлення
-    </h2>
+    <form method="get" id="filterForm">
+        <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">
+        <input type="hidden" name="size" th:value="${size}">
+    </form>
 
-    <div th:if="${orders == null || orders.isEmpty()}"
-         class="alert alert-info">
-        Замовлення відсутні
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{orders.col.status}">Статус</h6>
+                        <div th:each="status : ${allStatuses}" class="form-check">
+                            <input class="form-check-input" type="checkbox" name="statuses"
+                                   form="filterForm"
+                                   th:value="${status}"
+                                   th:checked="${selectedStatuses != null and #lists.contains(selectedStatuses, status)}">
+                            <label class="form-check-label" th:text="${status}">NEW</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{orders.col.date}">Дата замовлення</h6>
+                        <div class="mb-2">
+                            <label class="small text-muted" th:text="#{orders.date.z} ?: 'З:'">З:</label>
+                            <input type="date" class="form-control form-control-sm" name="dateFrom"
+                                   form="filterForm" th:value="${dateFrom}">
+                        </div>
+                        <div>
+                            <label class="small text-muted" th:text="#{orders.date.po} ?: 'По:'">По:</label>
+                            <input type="date" class="form-control form-control-sm" name="dateTo"
+                                   form="filterForm" th:value="${dateTo}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{catalog.filter.price}">Сума</h6>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text" th:text="#{catalog.price.from}">від</span>
+                            <input type="number" class="form-control" name="minPrice"
+                                   form="filterForm" th:value="${minPrice}" min="0" step="0.01">
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text" th:text="#{catalog.price.to}">до</span>
+                            <input type="number" class="form-control" name="maxPrice"
+                                   form="filterForm" th:value="${maxPrice}" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <button type="submit" form="filterForm" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
+                    <a href="?" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+
+                <div class="input-group" style="max-width: 400px;">
+                    <input type="text" class="form-control" name="search"
+                           form="filterForm"
+                           th:placeholder="#{orders.search.placeholder} ?: 'ID замовлення...'"
+                           th:value="${search}">
+                    <button class="btn btn-outline-primary" type="submit" form="filterForm">🔍</button>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <label class="text-muted small mb-0" th:text="#{catalog.sort.label}">Сортувати:</label>
+                    <select class="form-select form-select-sm" name="sortField" form="filterForm"
+                            onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+                        <option value="orderDate" th:selected="${sortField == 'orderDate'}" th:text="#{orders.col.date}">Дата</option>
+                        <option value="price" th:selected="${sortField == 'price'}" th:text="#{orders.col.price}">Ціна</option>
+                        <option value="id" th:selected="${sortField == 'id'}">ID</option>
+                    </select>
+
+                    <select class="form-select form-select-sm" name="sortDir" form="filterForm"
+                            onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+                        <option value="asc" th:selected="${sortDir == 'asc'}" th:text="#{catalog.sort.asc}">Зростання</option>
+                        <option value="desc" th:selected="${sortDir == 'desc'}" th:text="#{catalog.sort.desc}">Спадання</option>
+                    </select>
+                </div>
+            </div>
+
+            <div th:if="${orders.isEmpty()}" class="alert alert-info text-center" th:text="#{orders.empty}">
+                Замовлення відсутні
+            </div>
+
+            <div th:if="${!orders.isEmpty()}" class="table-responsive">
+                <table class="table table-striped align-middle shadow-sm border rounded">
+                    <thead class="table-dark">
+                    <tr>
+                        <th th:text="#{orders.col.id}">ID</th>
+                        <th sec:authorize="hasRole('EMPLOYEE') or hasRole('ADMIN')" th:text="#{orders.col.client}">Клієнт</th>
+                        <th th:text="#{orders.col.date}">Дата</th>
+                        <th th:text="#{orders.col.price}">Ціна</th>
+                        <th th:text="#{orders.col.status}">Статус</th>
+                        <th class="text-center" th:text="#{orders.col.actions}" style="min-width: 150px;">Дії</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td class="fw-bold">#<span th:text="${order.id}"></span></td>
+
+                        <td sec:authorize="hasRole('EMPLOYEE') or hasRole('ADMIN')"
+                            th:text="${order.clientEmail}"></td>
+
+                        <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></td>
+                        <td class="text-success fw-bold" th:text="${order.price} + ' ₴'"></td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${
+                                    order.status.name() == 'NEW' ? 'bg-secondary' :
+                                    (order.status.name() == 'ASSIGNED' ? 'bg-warning text-dark' :
+                                    (order.status.name() == 'DELIVERED' ? 'bg-success' : 'bg-danger'))
+                                  }"
+                                  th:text="${order.status}">STATUS</span>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex gap-1 justify-content-center flex-wrap">
+
+                                <div sec:authorize="hasRole('EMPLOYEE')"
+                                     th:if="${order.status?.name() == 'NEW'}">
+                                    <form th:action="@{/orders/{id}/take(id=${order.id})}" method="post">
+                                        <button class="btn btn-success btn-sm" th:text="#{orders.btn.take}">Взяти</button>
+                                    </form>
+                                </div>
+
+                                <div sec:authorize="hasRole('EMPLOYEE')"
+                                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                                    <form th:action="@{/orders/{id}/refuse(id=${order.id})}" method="post">
+                                        <button class="btn btn-outline-danger btn-sm" th:text="#{orders.btn.refuse}">Відмовитись</button>
+                                    </form>
+                                </div>
+
+                                <div sec:authorize="hasRole('EMPLOYEE')"
+                                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                                    <form th:action="@{/orders/{id}/canceled(id=${order.id})}" method="post">
+                                        <button class="btn btn-outline-danger btn-sm" th:text="#{orders.btn.cancel}">Відмінити</button>
+                                    </form>
+                                </div>
+
+                                <div sec:authorize="hasRole('EMPLOYEE')"
+                                     th:if="${order.status?.name() == 'ASSIGNED'}">
+                                    <form th:action="@{/orders/{id}/deliver(id=${order.id})}" method="post">
+                                        <button class="btn btn-outline-primary btn-sm" th:text="#{orders.btn.delivered}">Доставлено</button>
+                                    </form>
+                                </div>
+
+                                <div sec:authorize="hasRole('CLIENT')"
+                                     th:if="${order.status?.name() == 'NEW' || order.status?.name() == 'ASSIGNED'}">
+                                    <form th:action="@{/orders/{id}/client/canceled(id=${order.id})}" method="post">
+                                        <button class="btn btn-danger btn-sm"
+                                                th:text="#{orders.btn.cancel}"
+                                                th:attr="onclick='return confirm(\'' + (#{orders.confirm_cancel} ?: 'Ви впевнені?') + '\')'">
+                                            Відмінити
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <a th:href="@{/orders/{id}/details(id=${order.id})}"
+                                   class="btn btn-outline-primary btn-sm" th:text="#{orders.btn.details}">
+                                    Деталі
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage - 1} + ')'">←</button>
+                    </li>
+
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <button class="page-link" type="button"
+                                th:text="${i + 1}"
+                                th:onclick="'changePage(' + ${i} + ')'"></button>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage + 1} + ')'">→</button>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
     </div>
+</div> <footer th:replace="~{layout :: footer}"></footer>
 
-    <table th:if="${orders != null && !orders.isEmpty()}"
-           class="table table-striped align-middle">
-
-        <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Клієнт</th>
-            <th>Працівник</th>
-            <th>Дата</th>
-            <th>Ціна</th>
-            <th>Статус</th>
-            <th class="text-center">Дії</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="order : ${orders}">
-
-            <td th:text="${order.id}"></td>
-
-            <td th:text="${order.clientEmail != null ? order.clientEmail : '-'}"></td>
-
-            <td th:text="${order.employeeEmail != null ? order.employeeEmail : '-'}"></td>
-
-            <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></td>
-
-            <td th:text="${order.price} + ' грн'"></td>
-
-            <td>
-                <span class="badge bg-secondary"
-                      th:if="${order.status?.name() == 'NEW'}">NEW</span>
-
-                <span class="badge bg-warning text-dark"
-                      th:if="${order.status?.name() == 'ASSIGNED'}">ASSIGNED</span>
-
-                <span class="badge bg-success"
-                      th:if="${order.status?.name() == 'DELIVERED'}">DELIVERED</span>
-
-                <span class="badge bg-danger"
-                      th:if="${order.status?.name() == 'CANCELLED'}">CANCELLED</span>
-            </td>
-
-            <td class="text-center">
-
-                <div sec:authorize="hasRole('EMPLOYEE')"
-                     th:if="${order.status?.name() == 'NEW'}">
-                    <form th:action="@{/orders/{id}/take(id=${order.id})}"
-                          method="post">
-                        <button class="btn btn-success btn-sm">
-                            Взяти
-                        </button>
-                    </form>
-                </div>
-
-                <div sec:authorize="hasRole('EMPLOYEE')"
-                     th:if="${order.status?.name() == 'ASSIGNED'}">
-                    <form th:action="@{/orders/{id}/refuse(id=${order.id})}"
-                          method="post"
-                          class="d-inline">
-                        <button class="btn btn-outline-danger btn-sm">
-                            Відмовитись
-                        </button>
-                    </form>
-                </div>
-                <div sec:authorize="hasRole('EMPLOYEE')"
-                     th:if="${order.status?.name() == 'ASSIGNED'}">
-                    <form th:action="@{/orders/{id}/canceled(id=${order.id})}"
-                          method="post"
-                          class="d-inline">
-                        <button class="btn btn-outline-danger btn-sm">
-                            Відмінити
-                        </button>
-                    </form>
-                </div>
-                <div sec:authorize="hasRole('CLIENT')"
-                     th:if="${order.status?.name() == 'NEW' || order.status?.name() == 'ASSIGNED'}">
-
-                    <form th:action="@{/orders/{id}/client/canceled(id=${order.id})}"
-                          method="post"
-                          class="d-inline">
-                        <button class="btn btn-danger btn-sm"
-                                onclick="return confirm('Ви впевнені, що хочете відмінити замовлення? Кошти будуть повернені.')">
-                            Відмінити
-                        </button>
-                    </form>
-                </div>
-                <div sec:authorize="hasAnyRole('EMPLOYEE', 'ADMIN', 'CLIENT')">
-                    <a th:href="@{/orders/{id}/details(id=${order.id})}"
-                       class="btn btn-outline-primary btn-sm">
-                        Деталі
-                    </a>
-                </div>
-
-                <div sec:authorize="hasRole('EMPLOYEE')"
-                     th:if="${order.status?.name() == 'ASSIGNED'}">
-                    <form th:action="@{/orders/{id}/deliver(id=${order.id})}"
-                          method="post"
-                          class="d-inline">
-                        <button class="btn btn-outline-primary btn-sm">
-                            Доставлено
-                        </button>
-                    </form>
-                </div>
-
-            </td>
-
-        </tr>
-        </tbody>
-
-    </table>
-
-</div>
-
-<footer th:replace="~{layout :: footer}"></footer>
+<script>
+    function changePage(page) {
+        document.getElementById('pageInput').value = page;
+        document.getElementById('filterForm').submit();
+    }
+</script>
 
 </body>
 </html>

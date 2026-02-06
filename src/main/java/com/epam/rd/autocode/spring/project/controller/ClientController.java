@@ -4,11 +4,13 @@ import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -40,8 +42,12 @@ public class ClientController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/delete/{id}")
-    public String deleteClientById(@PathVariable("id") Long id){
-        clientService.deleteClient(id);
+    public String deleteClientById(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            clientService.deleteClient(id);
+        } catch (DataIntegrityViolationException e) {
+            redirectAttributes.addFlashAttribute("error", "error.client.delete_constraint");
+        }
         return "redirect:/clients";
     }
 

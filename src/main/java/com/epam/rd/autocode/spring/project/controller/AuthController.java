@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/client/register")
-    public String registerClient(@Valid @ModelAttribute("client") ClientDTO clientDTO,  BindingResult result) {
+    public String registerClient(@Valid @ModelAttribute("client") ClientDTO clientDTO,  BindingResult result,  Model model) {
 
         if (result.hasErrors()) {
             return "register";
@@ -38,7 +38,8 @@ public class AuthController {
         try{
             clientService.addClient(clientDTO);
         }catch(Exception ex){
-            return  "redirect:/client/register";
+            result.rejectValue("email", "validation.email.exists");
+            return  "register";
         }
 
         return "redirect:/login";

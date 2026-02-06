@@ -12,33 +12,33 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
                     <h3 class="mb-0">
-                        <i class="bi bi-person-circle"></i> Профіль клієнта
+                        <i class="bi bi-person-circle"></i> <span th:text="#{client.profile.title}">Профіль клієнта</span>
                     </h3>
                 </div>
 
                 <div class="card-body">
                     <dl class="row fs-5">
-                        <dt class="col-sm-4 text-muted">ID клієнта:</dt>
+                        <dt class="col-sm-4 text-muted" th:text="#{client.id}">ID клієнта:</dt>
                         <dd class="col-sm-8" th:text="${client.id}">5</dd>
 
-                        <dt class="col-sm-4 text-muted">Ім'я:</dt>
+                        <dt class="col-sm-4 text-muted" th:text="#{client.name}">Ім'я:</dt>
                         <dd class="col-sm-8 fw-bold" th:text="${client.name}">Олена Петрівна</dd>
 
-                        <dt class="col-sm-4 text-muted">Email:</dt>
+                        <dt class="col-sm-4 text-muted" th:text="#{client.email}">Email:</dt>
                         <dd class="col-sm-8" th:text="${client.email}">client@mail.com</dd>
 
-                        <dt class="col-sm-4 text-muted">Поточний баланс:</dt>
-                        <dd class="col-sm-8 text-success fw-bold" th:text="${client.balance} + ' грн.'">1500.00 грн.</dd>
+                        <dt class="col-sm-4 text-muted" th:text="#{client.balance}">Поточний баланс:</dt>
+                        <dd class="col-sm-8 text-success fw-bold" th:text="${client.balance} + ' ' + #{nav.currency}">1500.00 грн.</dd>
                     </dl>
 
                     <hr>
 
                     <div class="d-flex justify-content-between align-items-center mt-4">
-                        <a href="/clients" class="btn btn-secondary">
+                        <a href="/clients" class="btn btn-secondary" th:text="#{client.btn.back}">
                             ← Назад до списку
                         </a>
 
-                        <a th:href="@{/orders/client/{id}(id=${client.id})}" class="btn btn-primary">
+                        <a th:href="@{/orders/client/{id}(id=${client.id})}" class="btn btn-primary" th:text="#{client.btn.history}">
                             Історія замовлень клієнта
                         </a>
                     </div>

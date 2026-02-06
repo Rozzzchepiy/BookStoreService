@@ -11,54 +11,65 @@
 
         <div class="col-md-8">
             <h1 th:text="${book.name}">Назва книги</h1>
-            <h4 class="text-muted mb-3" th:text="'Автор: ' + ${book.author}">Автор</h4>
+            <h4 class="text-muted mb-3" th:text="#{book.author_prefix} + ' ' + ${book.author}">Автор</h4>
 
-            <h2 class="text-success my-3" th:text="${book.price} + ' грн.'">Ціна</h2>
+            <h2 class="text-success my-3" th:text="${book.price} + ' ' + #{book.price_currency}">Ціна</h2>
 
             <p class="lead" th:text="${book.description}">Опис книги...</p>
 
             <table class="table table-striped mt-4">
                 <tbody>
                 <tr>
-                    <th scope="row">Жанр</th>
+                    <th scope="row" th:text="#{book.genre}">Жанр</th>
                     <td th:text="${book.genre}"></td>
                 </tr>
                 <tr>
-                    <th scope="row">Вікова категорія</th>
+                    <th scope="row" th:text="#{book.age_group}">Вікова категорія</th>
                     <td th:text="${book.ageGroup}"></td>
                 </tr>
                 <tr>
-                    <th scope="row">Мова</th>
+                    <th scope="row" th:text="#{book.language}">Мова</th>
                     <td th:text="${book.language}"></td>
                 </tr>
                 <tr>
-                    <th scope="row">Кількість сторінок</th>
+                    <th scope="row" th:text="#{book.pages}">Кількість сторінок</th>
                     <td th:text="${book.pages}"></td>
                 </tr>
                 <tr>
-                    <th scope="row">Дата публікації</th>
+                    <th scope="row" th:text="#{book.pub_date}">Дата публікації</th>
                     <td th:text="${book.publicationDate}"></td>
                 </tr>
                 <tr>
-                    <th scope="row">Характеристики</th>
+                    <th scope="row" th:text="#{book.characteristics}">Характеристики</th>
                     <td th:text="${book.characteristics}"></td>
                 </tr>
                 </tbody>
             </table>
 
             <div class="mt-4">
-                <a href="/books" class="btn btn-secondary">← Назад до списку</a>
+                <a href="/books" class="btn btn-secondary" th:text="#{book.back_btn}">← Назад до списку</a>
 
                 <span sec:authorize="hasRole('EMPLOYEE')">
-        <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning">Редагувати</a>
-    </span>
+                    <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-warning" th:text="#{book.edit_btn}">Редагувати</a>
+                </span>
                 <div sec:authorize="hasRole('CLIENT')" class="mt-3">
-                    <form th:action="@{/orders/basket/add}" method="post" class="row g-3 align-items-center">
+
+                    <div th:if="${@cartComponent.isBookInCart(book.id)}">
+                        <a href="/orders/basket" class="btn btn-primary" th:text="#{book.go_to_cart_btn}">
+                            Перейти до кошика
+                        </a>
+                        <div class="text-success small mt-1" th:text="#{book.in_cart_msg}">
+                            Вже у кошику
+                        </div>
+                    </div>
+
+                    <form th:unless="${@cartComponent.isBookInCart(book.id)}"
+                          th:action="@{/orders/basket/add}" method="post" class="row g-3 align-items-center">
 
                         <input type="hidden" name="bookId" th:value="${book.id}">
 
                         <div class="col-auto">
-                            <label for="quantity" class="col-form-label fw-bold">Кількість:</label>
+                            <label for="quantity" class="col-form-label fw-bold" th:text="#{book.quantity_label}">Кількість:</label>
                         </div>
 
                         <div class="col-auto">
@@ -67,8 +78,8 @@
                         </div>
 
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-cart-plus"></i> Додати в кошик
+                            <button type="submit" class="btn btn-success" th:text="#{book.add_to_cart_btn}">
+                                Додати в кошик
                             </button>
                         </div>
                     </form>

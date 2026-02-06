@@ -1,91 +1,119 @@
 INSERT INTO users (email, name, password) VALUES
-('admin@admin', 'Admin', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'),
-('employee@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'),
-('client@client', 'Client', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'),
-('client2@example.com', 'user', 'password'),
-('client3@example.com', 'user', 'password'),
-('client4@example.com', 'user', 'password'),
-('client5@example.com', 'user', 'password'),
-('client6@example.com', 'user', 'password'),
-('client7@example.com', 'user', 'password'),
-('client8@example.com', 'user', 'password'),
-('client9@example.com', 'user', 'password'),
-('client10@example.com', 'user', 'password'),
-('client11@example.com', 'user', 'password'),
-('client12@example.com', 'user', 'password'),
-('client13@example.com', 'user', 'password'),
-('client14@example.com', 'user', 'password'),
-('client15@example.com', 'user', 'password'),
-('client16@example.com', 'user', 'password'),
-('client17@example.com', 'user', 'password'),
-('client18@example.com', 'user', 'password'),
-('client19@example.com', 'user', 'password'),
-('client20@example.com', 'user', 'password'),
-('client21@example.com', 'user', 'password');
-
+                                              ('admin@admin', 'Admin', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 1
+                                              ('employee@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 2
+                                              ('client@client', 'Client One', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 3
+                                              ('client2@client', 'Client Two', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'); -- ID 4 (Додав для тесту приватності)
 
 INSERT INTO user_roles (user_id, role) VALUES
-(1, 'ADMIN'), (2, 'EMPLOYEE'), (3, 'CLIENT'), (4, 'CLIENT'),
-(5, 'CLIENT'),(6, 'CLIENT'), (7, 'CLIENT'), (8, 'CLIENT'),
-(9, 'CLIENT'), (10, 'CLIENT'),(11, 'CLIENT'), (12, 'CLIENT'),
-(13, 'CLIENT'), (14, 'CLIENT'),(15, 'CLIENT'), (16, 'CLIENT'),
-(17, 'CLIENT'), (18, 'CLIENT'), (19, 'CLIENT'), (20, 'CLIENT'),
-(21, 'CLIENT'), (22, 'CLIENT'),(22, 'CLIENT');
+                                           (1, 'ADMIN'),
+                                           (2, 'EMPLOYEE'),
+                                           (3, 'CLIENT'),
+                                           (4, 'CLIENT');
 
 INSERT INTO employee_profiles (user_id, phone, birth_date) VALUES
-(2, '09999999', '2000-01-01');
+    (2, '0991234567', '1995-05-20');
 
 INSERT INTO client_profiles (user_id, balance) VALUES
-(3, 1000.00),
-(4, 1000.00),
-(5, 1000.00),
-(6, 1000.00),
-(7, 1000.00),
-(8, 1000.00),
-(9, 1000.00),
-(10, 1000.00),
-(11, 1000.00),
-(12, 1000.00),
-(13, 1000.00),
-(14, 1000.00),
-(15, 1000.00),
-(16, 1000.00),
-(17, 1000.00),
-(18, 1000.00),
-(19, 1000.00),
-(20, 1000.00),
-(21, 1000.00),
-(22, 1000.00);
+                                                   (3, 5000.00),
+                                                   (4, 2500.00);
 
-INSERT INTO books (name, genre, age_group, price, publication_year, author, number_of_pages, characteristics, description, language)
-VALUES
-    ('The Hidden Treasure', 'Adventure', 'ADULT', 200, '2018-05-15', 'Emily White', 400, 'Mysterious journey','An enthralling adventure of discovery', 'ENGLISH'),
-    ('Echoes of Eternity', 'Fantasy', 'TEEN', 200, '2011-01-15', 'Daniel Black', 350, 'Magical realms', 'A spellbinding tale of magic and destiny', 'ENGLISH'),
-    ('Whispers in the Shadows', 'Mystery', 'ADULT', 200, '2018-08-11', 'Sophia Green', 450, 'Intriguing suspense','A gripping mystery that keeps you guessing', 'ENGLISH'),
-    ('The Starlight Sonata', 'Romance', 'ADULT', 200, '2011-05-15', 'Michael Rose', 320, 'Heartwarming love story','A beautiful journey of love and passion', 'ENGLISH'),
-    ('Beyond the Horizon', 'Science Fiction', 'CHILD', 200, '2004-05-15', 'Alex Carter', 280,'Interstellar adventure', 'An epic sci-fi adventure beyond the stars', 'ENGLISH'),
-    ('Dancing with Shadows', 'Thriller', 'ADULT', 1000, '2015-05-15', 'Olivia Smith', 380, 'Suspenseful twists','A thrilling tale of danger and intrigue', 'ENGLISH'),
-    ('Voices in the Wind', 'Historical Fiction', 'ADULT', 500, '2017-05-15', 'William Turner', 500,'Rich historical setting', 'A compelling journey through time', 'ENGLISH'),
-    ('Serenade of Souls', 'Fantasy', 'TEEN', 2000, '2013-05-15', 'Isabella Reed', 330, 'Enchanting realms','A magical fantasy filled with wonder', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Silent Whispers', 'Mystery', 'ADULT', 4000, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-    ('Whirlwind Romance', 'Romance', 'OTHER', 199, '2022-05-15', 'Emma Turner', 360, 'Passionate love affair','A romance that sweeps you off your feet', 'ENGLISH');
+INSERT INTO books (name, genre, age_group, price, publication_year, author, number_of_pages, characteristics, description, language) VALUES
+('Harry Potter and the Sorcerers Stone', 'Fantasy', 'TEEN', 450.00, '1997-06-26', 'J.K. Rowling', 309, 'Magic, Wizards', 'The first book in the Harry Potter series.', 'ENGLISH'),
+('The Great Gatsby', 'Historical Fiction', 'ADULT', 300.50, '1925-04-10', 'F. Scott Fitzgerald', 180, 'Classic, Jazz Age', 'A novel about the American dream.', 'ENGLISH'),
+('1984', 'Science Fiction', 'ADULT', 280.00, '1949-06-08', 'George Orwell', 328, 'Dystopian, Politics', 'Big Brother is watching you.', 'ENGLISH'),
+('The Hobbit', 'Fantasy', 'TEEN', 400.00, '1937-09-21', 'J.R.R. Tolkien', 310, 'Adventure, Dragons', 'A journey of Bilbo Baggins.', 'ENGLISH'),
+('Murder on the Orient Express', 'Mystery', 'ADULT', 350.00, '1934-01-01', 'Agatha Christie', 256, 'Detective, Crime', 'Hercule Poirot solves a murder on a train.', 'ENGLISH'),
+('Pride and Prejudice', 'Romance', 'ADULT', 250.00, '1813-01-28', 'Jane Austen', 279, 'Classic, Love', 'A romantic novel of manners.', 'ENGLISH'),
+('Dune', 'Science Fiction', 'ADULT', 600.00, '1965-08-01', 'Frank Herbert', 412, 'Space, Politics', 'Epic science fiction set on Arrakis.', 'ENGLISH'),
+('The Catcher in the Rye', 'Fiction', 'TEEN', 290.00, '1951-07-16', 'J.D. Salinger', 277, 'Angst, Coming-of-age', 'The story of Holden Caulfield.', 'ENGLISH'),
+('To Kill a Mockingbird', 'Historical Fiction', 'ADULT', 320.00, '1960-07-11', 'Harper Lee', 281, 'Justice, South', 'A lawyer defends a black man.', 'ENGLISH'),
+('It', 'Thriller', 'ADULT', 550.00, '1986-09-15', 'Stephen King', 1138, 'Horror, Clowns', 'A group of kids fight a monster.', 'ENGLISH'),
 
-INSERT INTO orders (client_id, employee_id, order_date, price, status)
-VALUES (3, NULL, '2026-01-25 10:30:00', 450.00, 'NEW');
+('Кобзар', 'Poetry', 'ADULT', 200.00, '1840-01-01', 'Тарас Шевченко', 400, 'Classic, Ukraine', 'Збірка поетичних творів.', 'UKRAINIAN'),
+('Тіні забутих предків', 'Historical Fiction', 'ADULT', 150.00, '1911-01-01', 'Михайло Коцюбинський', 120, 'History, Love', 'Повість про кохання Івана та Марічки.', 'UKRAINIAN'),
+('Захар Беркут', 'Historical Fiction', 'TEEN', 180.00, '1883-01-01', 'Іван Франко', 250, 'History, Heroism', 'Історична повість про боротьбу з монголами.', 'UKRAINIAN'),
+('Лісова пісня', 'Fantasy', 'TEEN', 140.00, '1911-01-01', 'Леся Українка', 160, 'Drama, Mythology', 'Драма-феєрія.', 'UKRAINIAN'),
+('Кайдашева сім’я', 'Comedy', 'ADULT', 170.00, '1878-01-01', 'Іван Нечуй-Левицький', 220, 'Realism, Family', 'Соціально-побутова повість.', 'UKRAINIAN'),
+('Солодка Даруся', 'Drama', 'ADULT', 220.00, '2004-01-01', 'Марія Матіос', 280, 'History, Tragedy', 'Драма про долю дівчини на Буковині.', 'UKRAINIAN'),
+('Ворошиловград', 'Fiction', 'ADULT', 300.00, '2010-01-01', 'Сергій Жадан', 350, 'Modern, Road-movie', 'Роман про повернення додому.', 'UKRAINIAN'),
+('Тореадори з Васюківки', 'Adventure', 'CHILD', 190.00, '1973-01-01', 'Всеволод Нестайко', 400, 'Fun, Childhood', 'Пригоди двох друзів.', 'UKRAINIAN'),
+('Інтернат', 'Drama', 'ADULT', 310.00, '2017-01-01', 'Сергій Жадан', 320, 'War, Survival', 'Подорож крізь зону конфлікту.', 'UKRAINIAN'),
+('Століття Якова', 'Historical Fiction', 'ADULT', 240.00, '2010-01-01', 'Володимир Лис', 280, 'History, Life', 'Історія довгого життя волинянина.', 'UKRAINIAN'),
+
+('Faust', 'Drama', 'ADULT', 400.00, '1808-01-01', 'Johann Wolfgang von Goethe', 500, 'Philosophy, Classic', 'A pact with the devil.', 'GERMAN'),
+('Der Prozess', 'Mystery', 'ADULT', 350.00, '1925-01-01', 'Franz Kafka', 200, 'Absurd, Law', 'A man arrested for an unknown crime.', 'GERMAN'),
+('Die Verwandlung', 'Fiction', 'ADULT', 150.00, '1915-01-01', 'Franz Kafka', 100, 'Surrealism', 'A man transforms into an insect.', 'GERMAN'),
+('Im Westen nichts Neues', 'Historical Fiction', 'ADULT', 320.00, '1929-01-01', 'Erich Maria Remarque', 250, 'War, Anti-war', 'A story about WWI.', 'GERMAN'),
+('Das Parfum', 'Thriller', 'ADULT', 380.00, '1985-01-01', 'Patrick Süskind', 300, 'Crime, Scent', 'Story of a murderer.', 'GERMAN');
 
 
-INSERT INTO orders (client_id, employee_id, order_date, price, status)
-VALUES (3, 2, '2026-01-25 11:15:00', 820.50, 'ASSIGNED');
+INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
+                                                                           (3, NULL, '2023-10-01 10:00:00', 450.00, 'NEW'),
+                                                                           (3, NULL, '2023-10-02 11:30:00', 600.00, 'NEW'),
+                                                                           (3, NULL, '2023-10-05 09:15:00', 280.00, 'NEW'),
+                                                                           (3, NULL, '2023-10-20 14:00:00', 1200.00, 'NEW'),
+                                                                           (3, NULL, NOW(), 550.00, 'NEW'); -- Найсвіжіше
+
+INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
+                                                                           (3, 2, '2023-09-15 10:00:00', 300.50, 'ASSIGNED'),
+                                                                           (3, 2, '2023-09-18 16:45:00', 820.00, 'ASSIGNED'),
+                                                                           (3, 2, '2023-09-20 12:20:00', 150.00, 'ASSIGNED');
+
+INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
+                                                                           (3, 2, '2023-08-01 10:00:00', 250.00, 'DELIVERED'),
+                                                                           (3, 2, '2023-08-05 11:00:00', 400.00, 'DELIVERED'),
+                                                                           (3, 2, '2023-08-10 14:30:00', 1000.00, 'DELIVERED'),
+                                                                           (3, 2, '2023-08-15 09:00:00', 190.00, 'DELIVERED'),
+                                                                           (3, 2, '2023-08-20 18:00:00', 320.00, 'DELIVERED');
+
+INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
+                                                                           (3, NULL, '2023-09-01 10:00:00', 200.00, 'CANCELLED'),
+                                                                           (3, 2, '2023-09-05 15:30:00', 600.00, 'CANCELLED');
+
+INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
+                                                                           (4, NULL, '2023-10-10 12:00:00', 1500.00, 'NEW'),
+                                                                           (4, 2, '2023-10-12 14:00:00', 400.00, 'ASSIGNED'),
+                                                                           (4, 2, '2023-08-25 09:00:00', 350.00, 'DELIVERED');
 
 
-INSERT INTO orders (client_id, employee_id, order_date, price, status)
-VALUES (3, 2, '2026-01-24 18:40:00', 1200.00, 'DELIVERED');
+
+INSERT INTO book_items (order_id, book_id, quantity) VALUES
+
+(1, 1, 1),
+
+(2, 3, 2),
+
+(3, 11, 1),
+(3, 14, 1),
+
+(4, 7, 2),
+
+(5, 25, 1),
+
+(6, 2, 1),
+(6, 4, 1),
+
+(7, 10, 1),
+
+(8, 12, 1),
+
+(9, 6, 1),
+
+(10, 1, 1),
+
+(11, 20, 4),
+
+(12, 18, 1),
+
+(13, 24, 1),
+
+(14, 11, 1),
+
+(15, 9, 2),
+
+
+(16, 21, 3),
+
+(17, 5, 1),
+
+(18, 16, 1);

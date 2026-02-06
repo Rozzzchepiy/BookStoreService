@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Мій профіль</h3>
+                    <h3 class="mb-0" th:text="#{profile.title}">Мій профіль</h3>
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-4">
@@ -19,19 +19,19 @@
 
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                            <strong>Ім'я:</strong> <span th:text="${client.name}">Name</span>
+                            <strong th:text="#{profile.name}">Ім'я:</strong> <span th:text="${client.name}">Name</span>
                         </li>
                         <li class="list-group-item">
-                            <strong>Email:</strong> <span th:text="${client.email}">email@example.com</span>
+                            <strong th:text="#{profile.email}">Email:</strong> <span th:text="${client.email}">email@example.com</span>
                         </li>
                         <li class="list-group-item">
-                            <strong>Баланс:</strong> <span class="badge bg-success" th:text="${client.balance} + ' грн.'">0.00</span>
+                            <strong th:text="#{profile.balance}">Баланс:</strong> <span class="badge bg-success" th:text="${client.balance} + ' ' + #{nav.currency}">0.00</span>
                         </li>
                     </ul>
 
                     <div class="d-grid gap-2 mt-4">
-                        <a href="/profile/edit" class="btn btn-warning">Редагувати дані</a>
-                        <a href="/books" class="btn btn-outline-secondary">До списку книг</a>
+                        <a href="/profile/edit" class="btn btn-warning" th:text="#{profile.btn.edit}">Редагувати дані</a>
+                        <a href="/books" class="btn btn-outline-secondary" th:text="#{profile.btn.books}">До списку книг</a>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import jakarta.validation.Valid;
@@ -35,6 +36,7 @@ public class BookController {
             @RequestParam(required = false) List<String> authors,
             @RequestParam(required = false) List<String> genres,
             @RequestParam(required = false) List<Language> languages,
+            @RequestParam(required = false) List<AgeGroup> ageGroups,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice
     ) {
@@ -44,7 +46,7 @@ public class BookController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<BookDTO> booksPage = bookService.getAllBooks(search, authors, genres, languages, minPrice, maxPrice, pageable);
+        Page<BookDTO> booksPage = bookService.getAllBooks(search, authors, genres, languages, ageGroups, minPrice, maxPrice, pageable);
 
         model.addAttribute("books", booksPage.getContent());
         model.addAttribute("currentPage", booksPage.getNumber());
@@ -54,11 +56,14 @@ public class BookController {
         model.addAttribute("allAuthors", bookService.getAllAuthors());
         model.addAttribute("allGenres", bookService.getAllGenres());
         model.addAttribute("allLanguages", bookService.getAllLanguages());
+        model.addAttribute("allAgeGroups", bookService.getAllAgeGroups());
+
 
         model.addAttribute("search", search);
         model.addAttribute("selectedAuthors", authors);
         model.addAttribute("selectedGenres", genres);
         model.addAttribute("selectedLanguages", languages);
+        model.addAttribute("selectedAgeGroups", ageGroups);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
         model.addAttribute("sortField", sortField);
@@ -98,7 +103,7 @@ public class BookController {
         if (bindingResult.hasErrors()){
             return "books/add";
         }
-        BookDTO newBook = bookService.addBook(book);
+        bookService.addBook(book);
         return "redirect:/books";
     }
 
@@ -111,7 +116,7 @@ public class BookController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/edit/{id}")
-    public String updateBook(@PathVariable("id") Long id, @Valid @ModelAttribute BookDTO book,  BindingResult bindingResult){
+    public String updateBook(@PathVariable("id") Long id, @Valid @ModelAttribute("book") BookDTO book,  BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             return "books/edit";
         }
