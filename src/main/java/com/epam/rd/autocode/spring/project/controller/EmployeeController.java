@@ -1,10 +1,14 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,12 +28,19 @@ public class EmployeeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public String getAllEmployees(Model model){
-        List<EmployeeDTO> employees = employeeService.getAllEmployees();
-        employees.forEach(e -> e.setPassword(null));
-        model.addAttribute("employees", employees);
+    public String getAllEmployees(Model model,
+                                  @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "5") int size,
+                                  @RequestParam(required = false) String keyword){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EmployeeDTO> employeesPage = employeeService.getAllEmployees(pageable, keyword);
+
+        model.addAttribute("employees", employeesPage);
+        model.addAttribute("keyword", keyword);
         return "employees";
     }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/add")
     public String createEmployeeForm(Model model) {
@@ -90,13 +102,23 @@ public class EmployeeController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable("id") Long id,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(required = false) String keyword,
                                  RedirectAttributes redirectAttributes) {
         try {
             employeeService.deleteEmployee(id);
         } catch (DataIntegrityViolationException e) {
             redirectAttributes.addFlashAttribute("error", "error.employee.delete_constraint");
         }
+
+        redirectAttributes.addAttribute("page", page);
+        if (keyword != null && !keyword.isEmpty()) {
+            redirectAttributes.addAttribute("keyword", keyword);
+        }
+
         return "redirect:/employees";
     }
+
+
 
 }

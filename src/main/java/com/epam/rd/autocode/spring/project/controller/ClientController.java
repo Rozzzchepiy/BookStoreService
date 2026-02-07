@@ -5,6 +5,9 @@ import com.epam.rd.autocode.spring.project.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,10 +27,17 @@ public class ClientController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @GetMapping
-    public String getAllClients(Model model){
-        List<ClientDTO> clients = clientService.getAllClients();
-        clients.forEach(e -> e.setPassword(null));
-        model.addAttribute("clients", clients);
+    public String getAllClients(Model model,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(required = false) String keyword) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ClientDTO> clientPage = clientService.getAllClients(pageable, keyword);
+
+        model.addAttribute("clients", clientPage);
+        model.addAttribute("keyword", keyword);
+
         return "clients";
     }
 
@@ -42,13 +52,36 @@ public class ClientController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @PostMapping("/delete/{id}")
-    public String deleteClientById(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    public String deleteClientById(@PathVariable("id") Long id,
+                                   @RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(required = false) String keyword,
+                                   RedirectAttributes redirectAttributes) {
         try {
             clientService.deleteClient(id);
         } catch (DataIntegrityViolationException e) {
             redirectAttributes.addFlashAttribute("error", "error.client.delete_constraint");
         }
+
+        redirectAttributes.addAttribute("page", page);
+        if (keyword != null && !keyword.isEmpty()) {
+            redirectAttributes.addAttribute("keyword", keyword);
+        }
+
         return "redirect:/clients";
+    }
+
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    @PostMapping("/{id}/block")
+    public String blockClient(@PathVariable("id") Long id, @RequestHeader(value = "Referer", required = false) String referer) {
+        clientService.blockClient(id);
+        return "redirect:" + (referer != null ? referer : "/clients");
+    }
+
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    @PostMapping("/{id}/unblock")
+    public String unblockClient(@PathVariable("id") Long id, @RequestHeader(value = "Referer", required = false) String referer) {
+        clientService.unblockClient(id);
+        return "redirect:" + (referer != null ? referer : "/clients");
     }
 
 

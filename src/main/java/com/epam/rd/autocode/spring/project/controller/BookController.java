@@ -146,4 +146,11 @@ public class BookController {
         return "redirect:/books";
     }
 
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("/{id}/buy-intent")
+    public String buyBookAfterLogin(@PathVariable("id") Long id, Principal principal) {
+        cartService.addItemToCart(principal.getName(), id, 1);
+        return "redirect:/orders/basket";
+    }
+
 }

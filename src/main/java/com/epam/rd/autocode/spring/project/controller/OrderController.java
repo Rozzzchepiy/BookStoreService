@@ -361,7 +361,11 @@ public class OrderController {
             orderService.addOrder(orderDTO, email);
             cartService.clearCart(email);
         } catch (RuntimeException e) {
-            return "redirect:/orders/basket?error=" + e.getMessage();
+            if ("error.not_enough_money".equals(e.getMessage())) {
+                return "redirect:/orders/basket?error=not_enough_money";
+            }
+
+            return "redirect:/orders/basket?error=generic_error";
         }
 
         return "redirect:/orders/client/my";

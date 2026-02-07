@@ -29,4 +29,6 @@ public class ClientDTO {
     @NotNull(message = "{validation.required}")
     @Min(value = 0, message = "{validation.price.min}")
     private BigDecimal balance;
+
+    private boolean isBlocked;
 }

@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,5 +43,14 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private EmployeeProfile employeeProfile;
+
+    @Column(name = "is_blocked", nullable = false)
+    private boolean isBlocked = false;
+
+    @Column(name = "failed_attempt")
+    private int failedAttempt = 0;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
 
 }

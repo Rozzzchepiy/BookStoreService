@@ -135,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal currentBalance = client.getClientProfile().getBalance();
 
         if (currentBalance.compareTo(totalPrice) < 0) {
-            throw new RuntimeException("Not enough money! Required: " + totalPrice + ", Available: " + currentBalance);
+            throw new RuntimeException("error.not_enough_money");
         }
 
         client.getClientProfile().setBalance(currentBalance.subtract(totalPrice));

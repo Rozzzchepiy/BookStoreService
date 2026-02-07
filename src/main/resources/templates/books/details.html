@@ -59,12 +59,14 @@
                         Редагувати
                     </a>
 
-                    <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"
-                          onsubmit="return confirm('Ви дійсно хочете видалити цю книгу? Цю дію неможливо відмінити.');">
+                    <form th:action="@{/books/delete/{id}(id=${book.id})}"
+                           method="post"
+                           th:attr="onsubmit='return confirm(\'' + #{book.confirm_delete} + '\');'">
                         <button type="submit" class="btn btn-danger">
-                            <span th:text="#{book.delete_btn} ?: 'Видалити'">Видалити</span>
+                            <span th:text="#{book.delete_btn}">Delete</span>
                         </button>
                     </form>
+
                 </div>
 
                 <div sec:authorize="hasRole('CLIENT')">
@@ -79,9 +81,7 @@
 
                     <form th:unless="${isBookInCart}"
                           th:action="@{/orders/basket/add}" method="post" class="d-flex align-items-center gap-2">
-
                         <input type="hidden" name="bookId" th:value="${book.id}">
-
                         <div>
                             <label for="quantity" class="visually-hidden" th:text="#{book.quantity_label}">Кількість:</label>
                             <div class="input-group">
@@ -90,11 +90,26 @@
                                        value="1" min="1" class="form-control" style="width: 80px;">
                             </div>
                         </div>
-
                         <button type="submit" class="btn btn-success" th:text="#{book.add_to_cart_btn}">
                             Додати в кошик
                         </button>
                     </form>
+                </div>
+
+                <div sec:authorize="isAnonymous()"> <div class="d-flex align-items-center gap-2">
+                    <div class="input-group" style="width: 130px; opacity: 0.7;">
+                        <span class="input-group-text" th:text="#{book.quantity_label}">К-сть:</span>
+                        <input type="number" value="1" disabled class="form-control">
+                    </div>
+
+                    <a th:href="@{/books/{id}/buy-intent(id=${book.id})}"
+                       class="btn btn-success">
+                        <i class="bi bi-cart-plus"></i> <span th:text="#{book.add_to_cart_btn}">Купити</span>
+                    </a>
+                </div>
+                    <div class="text-muted small mt-1">
+                        * <span th:text="#{login.required_hint} ?: 'Необхідно увійти'">Потрібен вхід</span>
+                    </div>
                 </div>
             </div>
         </div>

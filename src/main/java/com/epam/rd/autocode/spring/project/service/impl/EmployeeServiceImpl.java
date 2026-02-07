@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.annotation.Loggable;
+import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
@@ -10,6 +11,8 @@ import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +31,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EmployeeDTO> getAllEmployees() {
-        List<User> employees = userRepository.findAllByRolesContaining(Role.EMPLOYEE);
+    public Page<EmployeeDTO> getAllEmployees(Pageable pageable, String keyword) {
 
-        return employees.stream()
-                .map(this::mapper)
-                .collect(Collectors.toList());
+        Page<User> employeesPage;
+        if (keyword != null && !keyword.isBlank()) {
+            employeesPage = userRepository.findAllByRolesContainingAndKeyword(Role.EMPLOYEE, keyword, pageable);
+        } else {
+            employeesPage = userRepository.findAllByRolesContaining(Role.EMPLOYEE, pageable);
+        }
+
+        return employeesPage.map(this::mapper);
     }
 
     @Override

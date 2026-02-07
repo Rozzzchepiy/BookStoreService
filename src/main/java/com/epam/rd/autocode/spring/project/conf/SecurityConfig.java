@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -18,12 +19,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig{
 
-
+    private final UserBlockingFilter userBlockingFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(a -> a
                 .requestMatchers("/", "/books", "/client/register", "/login", "/h2-console/**").permitAll()
+                .requestMatchers("/books/*/buy-intent").authenticated()
                 .anyRequest().permitAll()
 
         )
@@ -32,14 +34,15 @@ public class SecurityConfig{
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .formLogin(f->f
                         .loginPage("/login")
-                        .defaultSuccessUrl("/books",  true)
+                        .defaultSuccessUrl("/books",  false)
                         .permitAll()
                 )
                 .logout(l -> l
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/books")
                         .permitAll()
-                 );
+                 )
+                .addFilterAfter(userBlockingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

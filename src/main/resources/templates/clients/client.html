@@ -29,14 +29,28 @@
 
                         <dt class="col-sm-4 text-muted" th:text="#{client.balance}">Поточний баланс:</dt>
                         <dd class="col-sm-8 text-success fw-bold" th:text="${client.balance} + ' ' + #{nav.currency}">1500.00 грн.</dd>
+
+                        <dt class="col-sm-4 text-muted" th:text="#{clients.col.status}" >Статус акаунта:</dt>
+                        <dd class="col-sm-8">
+                            <span th:if="${!client.blocked}" class="badge bg-success" th:text="#{client.status.active}">Активний</span>
+                            <span th:if="${client.blocked}" class="badge bg-danger" th:text="#{client.status.blocked}">Заблокований</span>
+                        </dd>
                     </dl>
 
                     <hr>
 
                     <div class="d-flex justify-content-between align-items-center mt-4">
-                        <a href="/clients" class="btn btn-secondary" th:text="#{client.btn.back}">
-                            ← Назад до списку
-                        </a>
+                        <div>
+                            <a href="/clients" class="btn btn-secondary" th:text="#{client.btn.back}">← Назад</a>
+
+                            <form th:if="${!client.blocked}" th:action="@{/clients/{id}/block(id=${client.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-warning ms-2" th:text="#{client.btn.block}" >Заблокувати клієнта</button>
+                            </form>
+
+                            <form th:if="${client.blocked}" th:action="@{/clients/{id}/unblock(id=${client.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-success ms-2" th:text="#{client.btn.unblock}">Розблокувати клієнта</button>
+                            </form>
+                        </div>
 
                         <a th:href="@{/orders/client/{id}(id=${client.id})}" class="btn btn-primary" th:text="#{client.btn.history}">
                             Історія замовлень клієнта

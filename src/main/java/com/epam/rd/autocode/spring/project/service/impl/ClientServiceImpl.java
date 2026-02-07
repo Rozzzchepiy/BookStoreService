@@ -9,12 +9,16 @@ import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,14 +31,89 @@ public class ClientServiceImpl implements ClientService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    @Value("${security.login.lock-duration-minutes}")
+    private long lockTimeDuration;
+
+    @Value("${security.login.max-attempts}")
+    private int maxFailedAttempts;
+
+    @Transactional
+    @Override
+    public void increaseFailedAttempts(User user) {
+        int newFailAttempts = user.getFailedAttempt() + 1;
+        user.setFailedAttempt(newFailAttempts);
+
+        if (user.getFailedAttempt() >= maxFailedAttempts) {
+            lock(user);
+        }
+        userRepository.save(user);
+    }
+
+    @Transactional
+    @Loggable
+    public void resetFailedAttempts(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            user.setFailedAttempt(0);
+            user.setLockTime(null);
+            userRepository.save(user);
+        });
+    }
+
+    @Transactional
+    @Override
+    @Loggable
+    public void lock(User user) {
+        user.setLockTime(LocalDateTime.now().plusMinutes(lockTimeDuration));
+    }
+
+    @Transactional
+    @Override
+    @Loggable
+    public boolean unlockWhenTimeExpired(User user) {
+        if (user.getLockTime() != null) {
+            if (user.getLockTime().isBefore(LocalDateTime.now())) {
+                user.setLockTime(null);
+                user.setFailedAttempt(0);
+                userRepository.save(user);
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    @Loggable
+    @Transactional
+    public void blockClient(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        user.setBlocked(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Loggable
+    @Transactional
+    public void unblockClient(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        user.setBlocked(false);
+        userRepository.save(user);
+    }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ClientDTO> getAllClients() {
-        List<User> clients = userRepository.findAllByRolesContaining(Role.CLIENT);
-        return clients.stream()
-                .map(this::mapper)
-                .collect(Collectors.toList());
+    public Page<ClientDTO> getAllClients(Pageable pageable, String keyword) {
+        Page<User> clientsPage;
+
+        if (keyword != null && !keyword.isBlank()) {
+            clientsPage = userRepository.findAllByRolesContainingAndKeyword(Role.CLIENT, keyword, pageable);
+        } else {
+            clientsPage = userRepository.findAllByRolesContaining(Role.CLIENT, pageable);
+        }
+
+        return clientsPage.map(this::mapper);
     }
 
     @Override
@@ -138,6 +217,7 @@ public class ClientServiceImpl implements ClientService {
         clientDTO.setName(user.getName());
         clientDTO.setPassword(null);
         clientDTO.setBalance(user.getClientProfile().getBalance());
+        clientDTO.setBlocked(user.isBlocked());
         return clientDTO;
     }
 }

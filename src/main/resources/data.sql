@@ -1,21 +1,60 @@
-INSERT INTO users (email, name, password) VALUES
-                                              ('admin@admin', 'Admin', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 1
-                                              ('employee@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 2
-                                              ('client@client', 'Client One', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'), -- ID 3
-                                              ('client2@client', 'Client Two', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6'); -- ID 4 (Додав для тесту приватності)
+INSERT INTO users (email, name, password, is_blocked, failed_attempt) VALUES
+                                              ('admin@admin', 'Admin', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee2@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee3@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee4@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee5@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee6@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee7@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee8@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('employee9@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client@client', 'Client One', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client2@client', 'Client two', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client3@client', 'Client three', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client4@client', 'Client four', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client5@client', 'Client five', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client6@client', 'Client six', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('client7@client', 'Client seven', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0);
 
 INSERT INTO user_roles (user_id, role) VALUES
                                            (1, 'ADMIN'),
                                            (2, 'EMPLOYEE'),
-                                           (3, 'CLIENT'),
-                                           (4, 'CLIENT');
+                                           (3, 'EMPLOYEE'),
+                                           (4, 'EMPLOYEE'),
+                                           (5, 'EMPLOYEE'),
+                                           (6, 'EMPLOYEE'),
+                                           (7, 'EMPLOYEE'),
+                                           (8, 'EMPLOYEE'),
+                                           (9, 'EMPLOYEE'),
+                                           (10, 'EMPLOYEE'),
+                                           (11, 'CLIENT'),
+                                           (12, 'CLIENT'),
+                                           (13, 'CLIENT'),
+                                           (14, 'CLIENT'),
+                                           (15, 'CLIENT'),
+                                           (16, 'CLIENT'),
+                                           (17, 'CLIENT');
 
 INSERT INTO employee_profiles (user_id, phone, birth_date) VALUES
-    (2, '0991234567', '1995-05-20');
+    (2, '0991234567', '1995-05-20'),
+    (3, '0991233567', '1995-05-20'),
+    (4, '0991236567', '1995-05-20'),
+    (5, '099146434567', '1995-05-20'),
+    (6, '09912345767', '1995-05-20'),
+    (7, '0991232217', '1995-05-20'),
+    (8, '0991231247', '1995-05-20'),
+    (9, '09912365757', '1995-05-20'),
+    (10, '099123242347', '1995-05-20');
 
 INSERT INTO client_profiles (user_id, balance) VALUES
-                                                   (3, 5000.00),
-                                                   (4, 2500.00);
+                                                   (11, 5000.00),
+                                                   (12, 5000.00),
+                                                   (13, 5000.00),
+                                                   (14, 5000.00),
+                                                   (15, 5000.00),
+                                                   (16, 5000.00),
+                                                   (17, 2500.00);
 
 INSERT INTO books (name, genre, age_group, price, publication_year, author, number_of_pages, characteristics, description, language) VALUES
 ('Harry Potter and the Sorcerers Stone', 'Fantasy', 'TEEN', 450.00, '1997-06-26', 'J.K. Rowling', 309, 'Magic, Wizards', 'The first book in the Harry Potter series.', 'ENGLISH'),
@@ -48,32 +87,32 @@ INSERT INTO books (name, genre, age_group, price, publication_year, author, numb
 
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
-                                                                           (3, NULL, '2023-10-01 10:00:00', 450.00, 'NEW'),
-                                                                           (3, NULL, '2023-10-02 11:30:00', 600.00, 'NEW'),
-                                                                           (3, NULL, '2023-10-05 09:15:00', 280.00, 'NEW'),
-                                                                           (3, NULL, '2023-10-20 14:00:00', 1200.00, 'NEW'),
-                                                                           (3, NULL, NOW(), 550.00, 'NEW'); -- Найсвіжіше
+                                                                           (11, NULL, '2023-10-01 10:00:00', 450.00, 'NEW'),
+                                                                           (11, NULL, '2023-10-02 11:30:00', 600.00, 'NEW'),
+                                                                           (11, NULL, '2023-10-05 09:15:00', 280.00, 'NEW'),
+                                                                           (11, NULL, '2023-10-20 14:00:00', 1200.00, 'NEW'),
+                                                                           (11, NULL, NOW(), 550.00, 'NEW');
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
-                                                                           (3, 2, '2023-09-15 10:00:00', 300.50, 'ASSIGNED'),
-                                                                           (3, 2, '2023-09-18 16:45:00', 820.00, 'ASSIGNED'),
-                                                                           (3, 2, '2023-09-20 12:20:00', 150.00, 'ASSIGNED');
+                                                                           (11, 2, '2023-09-15 10:00:00', 300.50, 'ASSIGNED'),
+                                                                           (11, 2, '2023-09-18 16:45:00', 820.00, 'ASSIGNED'),
+                                                                           (11, 2, '2023-09-20 12:20:00', 150.00, 'ASSIGNED');
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
-                                                                           (3, 2, '2023-08-01 10:00:00', 250.00, 'DELIVERED'),
-                                                                           (3, 2, '2023-08-05 11:00:00', 400.00, 'DELIVERED'),
-                                                                           (3, 2, '2023-08-10 14:30:00', 1000.00, 'DELIVERED'),
-                                                                           (3, 2, '2023-08-15 09:00:00', 190.00, 'DELIVERED'),
-                                                                           (3, 2, '2023-08-20 18:00:00', 320.00, 'DELIVERED');
+                                                                           (11, 2, '2023-08-01 10:00:00', 250.00, 'DELIVERED'),
+                                                                           (11, 2, '2023-08-05 11:00:00', 400.00, 'DELIVERED'),
+                                                                           (11, 2, '2023-08-10 14:30:00', 1000.00, 'DELIVERED'),
+                                                                           (11, 2, '2023-08-15 09:00:00', 190.00, 'DELIVERED'),
+                                                                           (11, 2, '2023-08-20 18:00:00', 320.00, 'DELIVERED');
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
-                                                                           (3, NULL, '2023-09-01 10:00:00', 200.00, 'CANCELLED'),
-                                                                           (3, 2, '2023-09-05 15:30:00', 600.00, 'CANCELLED');
+                                                                           (11, NULL, '2023-09-01 10:00:00', 200.00, 'CANCELLED'),
+                                                                           (11, 2, '2023-09-05 15:30:00', 600.00, 'CANCELLED');
 
 INSERT INTO orders (client_id, employee_id, order_date, price, status) VALUES
-                                                                           (4, NULL, '2023-10-10 12:00:00', 1500.00, 'NEW'),
-                                                                           (4, 2, '2023-10-12 14:00:00', 400.00, 'ASSIGNED'),
-                                                                           (4, 2, '2023-08-25 09:00:00', 350.00, 'DELIVERED');
+                                                                           (11, NULL, '2023-10-10 12:00:00', 1500.00, 'NEW'),
+                                                                           (11, 2, '2023-10-12 14:00:00', 400.00, 'ASSIGNED'),
+                                                                           (11, 2, '2023-08-25 09:00:00', 350.00, 'DELIVERED');
 
 
 

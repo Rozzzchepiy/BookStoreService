@@ -9,7 +9,15 @@
 
   <div th:if="${param.error}" class="alert alert-danger">
     <span th:if="${param.error[0] == 'empty'}" th:text="#{cart.empty}">Кошик порожній!</span>
-    <span th:unless="${param.error[0] == 'empty'}" th:text="${param.error}">Помилка</span>
+
+    <span th:if="${param.error[0] == 'not_enough_money'}" th:text="#{cart.error.not_enough_money}">
+        Недостатньо грошей
+    </span>
+
+    <span th:if="${param.error[0] != 'empty' and param.error[0] != 'not_enough_money'}"
+          th:text="#{cart.error.generic_error}">
+        Помилка
+    </span>
   </div>
 
   <div th:if="${items.isEmpty()}" class="alert alert-info">
