@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.annotation.Loggable;
+import com.epam.rd.autocode.spring.project.criteria.BookSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
@@ -16,26 +17,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
 
     @Override
-    public Page<BookDTO> getAllBooks(String search, List<String> authors, List<String> genres,
-                                     List<Language> languages, List<AgeGroup> ageGroups,BigDecimal minPrice, BigDecimal maxPrice,
-                                     Pageable pageable) {
+    public Page<BookDTO> getAllBooks(BookSearchRequest request) {
+        Specification<Book> spec = BookSpecification.filterBooks(request);
 
-        Specification<Book> spec = BookSpecification.filterBooks(search, authors, genres, languages, ageGroups, minPrice, maxPrice);
-
-        return bookRepository.findAll(spec, pageable)
+        return bookRepository.findAll(spec, request.getPageable())
                 .map(book -> modelMapper.map(book, BookDTO.class));
     }
 

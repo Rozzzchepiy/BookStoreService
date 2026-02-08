@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service;
 
+import com.epam.rd.autocode.spring.project.criteria.ClientSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.model.User;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,7 @@ public interface ClientService {
     boolean unlockWhenTimeExpired(User user);
     void blockClient(Long id);
     void unblockClient(Long id);
-    Page<ClientDTO> getAllClients(Pageable pageable, String keyword);
+    Page<ClientDTO> getAllClients(ClientSearchRequest request);
 
     ClientDTO getClientById(Long id);
 

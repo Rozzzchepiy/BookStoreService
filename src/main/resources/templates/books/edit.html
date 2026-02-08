@@ -99,7 +99,7 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-warning" th:text="#{form.btn.update}">Оновити книгу</button>
-                            <a href="/books" class="btn btn-secondary" th:text="#{form.btn.cancel}">Скасувати</a>
+                            <a href="/books" class="btn btn-secondary"  onclick="if (history.length > 1) { event.preventDefault(); history.back(); }" th:text="#{form.btn.cancel}">Скасувати</a>
                         </div>
                     </form>
                 </div>

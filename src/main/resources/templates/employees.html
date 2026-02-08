@@ -11,11 +11,15 @@
         <h2 th:text="#{employees.title}">Список працівників</h2>
 
         <div class="d-flex gap-2">
-            <form class="d-flex" role="search" th:action="@{/employees}" method="get">
-                <input class="form-control me-2" type="search" name="keyword"
-                       th:value="${keyword}" th:placeholder="#{employees.search_placeholder}" aria-label="Search">
+            <form class="d-flex" role="search" th:action="@{/employees}" method="get" th:object="${filter}">
+
+                <input class="form-control me-2" type="search"
+                       th:field="*{keyword}"
+                       th:placeholder="#{employees.search_placeholder}" aria-label="Search">
+
                 <button class="btn btn-outline-primary" type="submit" th:text="#{common.btn.search}">Пошук</button>
-                <a th:if="${keyword != null && !keyword.isEmpty()}" th:href="@{/employees}"
+
+                <a th:if="${filter.keyword != null && !filter.keyword.isEmpty()}" th:href="@{/employees}"
                    class="btn btn-outline-secondary ms-2" th:text="#{common.btn.reset}">Скинути</a>
             </form>
 
@@ -25,15 +29,15 @@
         </div>
     </div>
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <span th:text="#{${error}}">Текст помилки</span>
+        <span th:text="#{${param.error[0]}}">Текст помилки</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <div th:if="${param.msg}" class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>
-        <span th:text="${success}">Операція успішна</span>
+        <span th:text="#{${param.msg[0]}}">Операція успішна</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
@@ -62,7 +66,7 @@
                             Редагувати
                         </a>
 
-                        <form th:action="@{/employees/delete/{id}(id=${e.id}, page=${employees.number}, keyword=${keyword})}"
+                        <form th:action="@{/employees/delete/{id}(id=${e.id}, page=${employees.number}, keyword=${filter.keyword})}"
                               method="post"
                               style="display:inline;"
                               th:attr="onsubmit='return confirm(\'' + #{employees.confirm_delete} + '\');'">
@@ -85,18 +89,18 @@
     <nav aria-label="Page navigation" th:if="${employees.totalPages > 1}" class="mt-3">
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${employees.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/employees(page=${employees.number - 1}, keyword=${keyword})}" aria-label="Previous">
+                <a class="page-link" th:href="@{/employees(page=${employees.number - 1}, keyword=${filter.keyword})}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
 
             <li class="page-item" th:each="i : ${#numbers.sequence(0, employees.totalPages - 1)}"
                 th:classappend="${i == employees.number} ? 'active'">
-                <a class="page-link" th:href="@{/employees(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+                <a class="page-link" th:href="@{/employees(page=${i}, keyword=${filter.keyword})}" th:text="${i + 1}">1</a>
             </li>
 
             <li class="page-item" th:classappend="${employees.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/employees(page=${employees.number + 1}, keyword=${keyword})}" aria-label="Next">
+                <a class="page-link" th:href="@{/employees(page=${employees.number + 1}, keyword=${filter.keyword})}" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

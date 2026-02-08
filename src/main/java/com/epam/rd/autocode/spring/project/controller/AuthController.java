@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/client/register")
-    public String registerClient(@Valid @ModelAttribute("client") ClientDTO clientDTO,  BindingResult result,  Model model) {
+    public String registerClient(@Valid @ModelAttribute("client") ClientDTO clientDTO,  BindingResult result) {
 
         if (result.hasErrors()) {
             return "register";

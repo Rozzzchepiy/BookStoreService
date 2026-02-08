@@ -8,61 +8,71 @@
 
 <div class="container flex-grow-1">
 
+    <div class="mt-3">
+        <div th:if="${param.msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="#{${param.msg}}">Success</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="#{${param.error}}">Error</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <form method="get" id="filterForm">
         <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">
         <input type="hidden" name="size" th:value="${size}">
     </form>
 
-    <div class="row">
-        <div class="col-lg-3 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
-                <div class="card-body">
+    <div class="row mt-3"> <div class="col-lg-3 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
+            <div class="card-body">
 
-                    <div class="mb-3">
-                        <h6 class="fw-bold" th:text="#{orders.col.status}">Статус</h6>
-                        <div th:each="status : ${allStatuses}" class="form-check">
-                            <input class="form-check-input" type="checkbox" name="statuses"
-                                   form="filterForm"
-                                   th:value="${status}"
-                                   th:checked="${selectedStatuses != null and #lists.contains(selectedStatuses, status)}">
-                            <label class="form-check-label" th:text="${status}">NEW</label>
-                        </div>
+                <div class="mb-3">
+                    <h6 class="fw-bold" th:text="#{orders.col.status}">Статус</h6>
+                    <div th:each="status : ${allStatuses}" class="form-check">
+                        <input class="form-check-input" type="checkbox" name="statuses"
+                               form="filterForm"
+                               th:value="${status}"
+                               th:checked="${selectedStatuses != null and #lists.contains(selectedStatuses, status)}">
+                        <label class="form-check-label" th:text="${status}">NEW</label>
                     </div>
-
-                    <div class="mb-3">
-                        <h6 class="fw-bold" th:text="#{orders.col.date}">Дата замовлення</h6>
-                        <div class="mb-2">
-                            <label class="small text-muted" th:text="#{orders.date.z} ?: 'З:'">З:</label>
-                            <input type="date" class="form-control form-control-sm" name="dateFrom"
-                                   form="filterForm" th:value="${dateFrom}">
-                        </div>
-                        <div>
-                            <label class="small text-muted" th:text="#{orders.date.po} ?: 'По:'">По:</label>
-                            <input type="date" class="form-control form-control-sm" name="dateTo"
-                                   form="filterForm" th:value="${dateTo}">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <h6 class="fw-bold" th:text="#{catalog.filter.price}">Сума</h6>
-                        <div class="input-group input-group-sm mb-2">
-                            <span class="input-group-text" th:text="#{catalog.price.from}">від</span>
-                            <input type="number" class="form-control" name="minPrice"
-                                   form="filterForm" th:value="${minPrice}" min="0" step="0.01">
-                        </div>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" th:text="#{catalog.price.to}">до</span>
-                            <input type="number" class="form-control" name="maxPrice"
-                                   form="filterForm" th:value="${maxPrice}" min="0" step="0.01">
-                        </div>
-                    </div>
-
-                    <button type="submit" form="filterForm" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
-                    <a href="?" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути</a>
                 </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold" th:text="#{orders.col.date}">Дата замовлення</h6>
+                    <div class="mb-2">
+                        <label class="small text-muted" th:text="#{orders.date.z} ?: 'З:'">З:</label>
+                        <input type="date" class="form-control form-control-sm" name="dateFrom"
+                               form="filterForm" th:value="${dateFrom}">
+                    </div>
+                    <div>
+                        <label class="small text-muted" th:text="#{orders.date.po} ?: 'По:'">По:</label>
+                        <input type="date" class="form-control form-control-sm" name="dateTo"
+                               form="filterForm" th:value="${dateTo}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold" th:text="#{catalog.filter.price}">Сума</h6>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text" th:text="#{catalog.price.from}">від</span>
+                        <input type="number" class="form-control" name="minPrice"
+                               form="filterForm" th:value="${minPrice}" min="0" step="0.01">
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text" th:text="#{catalog.price.to}">до</span>
+                        <input type="number" class="form-control" name="maxPrice"
+                               form="filterForm" th:value="${maxPrice}" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <button type="submit" form="filterForm" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
+                <a href="?" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути</a>
             </div>
         </div>
+    </div>
 
         <div class="col-lg-9">
 
@@ -134,35 +144,35 @@
 
                                 <div sec:authorize="hasRole('EMPLOYEE')"
                                      th:if="${order.status?.name() == 'NEW'}">
-                                    <form th:action="@{/orders/{id}/take(id=${order.id})}" method="post">
+                                    <form th:action="@{/orders/{id}/take(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-success btn-sm" th:text="#{orders.btn.take}">Взяти</button>
                                     </form>
                                 </div>
 
                                 <div sec:authorize="hasRole('EMPLOYEE')"
                                      th:if="${order.status?.name() == 'ASSIGNED'}">
-                                    <form th:action="@{/orders/{id}/refuse(id=${order.id})}" method="post">
+                                    <form th:action="@{/orders/{id}/refuse(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-outline-danger btn-sm" th:text="#{orders.btn.refuse}">Відмовитись</button>
                                     </form>
                                 </div>
 
                                 <div sec:authorize="hasRole('EMPLOYEE')"
                                      th:if="${order.status?.name() == 'ASSIGNED'}">
-                                    <form th:action="@{/orders/{id}/canceled(id=${order.id})}" method="post">
+                                    <form th:action="@{/orders/{id}/canceled(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-outline-danger btn-sm" th:text="#{orders.btn.cancel}">Відмінити</button>
                                     </form>
                                 </div>
 
                                 <div sec:authorize="hasRole('EMPLOYEE')"
                                      th:if="${order.status?.name() == 'ASSIGNED'}">
-                                    <form th:action="@{/orders/{id}/deliver(id=${order.id})}" method="post">
+                                    <form th:action="@{/orders/{id}/deliver(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-outline-primary btn-sm" th:text="#{orders.btn.delivered}">Доставлено</button>
                                     </form>
                                 </div>
 
                                 <div sec:authorize="hasRole('CLIENT')"
                                      th:if="${order.status?.name() == 'NEW' || order.status?.name() == 'ASSIGNED'}">
-                                    <form th:action="@{/orders/{id}/client/canceled(id=${order.id})}" method="post">
+                                    <form th:action="@{/orders/{id}/client/canceled(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-danger btn-sm"
                                                 th:text="#{orders.btn.cancel}"
                                                 th:attr="onclick='return confirm(\'' + (#{orders.confirm_cancel} ?: 'Ви впевнені?') + '\')'">

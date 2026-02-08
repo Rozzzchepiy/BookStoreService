@@ -1,7 +1,9 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.criteria.EmployeeSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
+import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +30,11 @@ public class EmployeeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public String getAllEmployees(Model model,
-                                  @RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "5") int size,
-                                  @RequestParam(required = false) String keyword){
-        Pageable pageable = PageRequest.of(page, size);
-        Page<EmployeeDTO> employeesPage = employeeService.getAllEmployees(pageable, keyword);
+    public String getAllEmployees(Model model, EmployeeSearchRequest request) {
+        Page<EmployeeDTO> employeesPage = employeeService.getAllEmployees(request);
 
         model.addAttribute("employees", employeesPage);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("filter", request);
         return "employees";
     }
 
@@ -51,8 +49,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
     public String createEmployee(@Valid @ModelAttribute("employee") EmployeeDTO employeeDTO,
-                                 BindingResult bindingResult,
-                                 Model model) {
+                                 BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return "employee_form";
@@ -60,7 +57,7 @@ public class EmployeeController {
 
         try {
             employeeService.addEmployee(employeeDTO);
-        } catch (Exception e) {
+        } catch (AlreadyExistException e) {
             bindingResult.rejectValue("email", "validation.email.exists");
             return "employee_form";
         }
@@ -72,7 +69,6 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public String getEmployeeById(@PathVariable("id") Long id,  Model model){
         EmployeeDTO employee = employeeService.getEmployeeById(id);
-        employee.setPassword(null);
         model.addAttribute("employee", employee);
         return "employee";
     }
@@ -87,33 +83,39 @@ public class EmployeeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
-    public String updateEmployee(@Valid @ModelAttribute("employee") EmployeeDTO employeeDTO, BindingResult bindingResult, @PathVariable("id") Long id) {
+    public String updateEmployee(@Valid @ModelAttribute("employee") EmployeeDTO employeeDTO,
+                                 BindingResult bindingResult,
+                                 @PathVariable("id") Long id,
+                                 RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "employee_form";
         }
         try {
-        employeeService.updateEmployee(id, employeeDTO);
-        }catch(Exception e){
+            employeeService.updateEmployee(id, employeeDTO);
+            redirectAttributes.addAttribute("msg", "employee.update.success");
+        } catch (Exception e) {
             bindingResult.rejectValue("email", "validation.email.exists");
-            return "employee_form";}
-        return  "redirect:/employees";
+            return "employee_form";
+        }
+        return "redirect:/employees";
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable("id") Long id,
-                                 @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(required = false) String keyword,
+                                 EmployeeSearchRequest request,
                                  RedirectAttributes redirectAttributes) {
         try {
             employeeService.deleteEmployee(id);
+            redirectAttributes.addAttribute("msg", "employee.delete.success");
         } catch (DataIntegrityViolationException e) {
-            redirectAttributes.addFlashAttribute("error", "error.employee.delete_constraint");
+            redirectAttributes.addAttribute("error", "error.employee.delete_constraint");
         }
 
-        redirectAttributes.addAttribute("page", page);
-        if (keyword != null && !keyword.isEmpty()) {
-            redirectAttributes.addAttribute("keyword", keyword);
+        redirectAttributes.addAttribute("page", request.getPage());
+        if (request.getKeyword() != null) {
+            redirectAttributes.addAttribute("keyword", request.getKeyword());
         }
 
         return "redirect:/employees";

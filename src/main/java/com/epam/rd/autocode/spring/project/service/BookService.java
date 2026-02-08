@@ -1,11 +1,11 @@
 package com.epam.rd.autocode.spring.project.service;
 
+import com.epam.rd.autocode.spring.project.criteria.BookSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import org.springframework.data.domain.Page;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface BookService {
@@ -21,9 +21,7 @@ public interface BookService {
 
     BookDTO addBook(BookDTO book);
 
-    Page<BookDTO> getAllBooks(String search, List<String> authors, List<String> genres,
-                              List<Language> languages, List<AgeGroup> ageGroups, BigDecimal minPrice, BigDecimal maxPrice,
-                              org.springframework.data.domain.Pageable pageable);
+    Page<BookDTO> getAllBooks(BookSearchRequest request);
 
     BookDTO getBookById(Long id);
 }

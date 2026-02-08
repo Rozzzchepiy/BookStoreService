@@ -7,161 +7,164 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <div class="container flex-grow-1">
-    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-      <span th:text="#{${successMessage}}">Успіх</span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  <form th:action="@{/books}" method="get" id="filterForm">
 
-    <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">
-    <input type="hidden" name="size" th:value="${size}"> <div class="row">
-    <div class="col-lg-3 mb-4">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
-        <div class="card-body">
-
-          <div class="mb-3">
-            <h6 class="fw-bold" th:text="#{catalog.filter.lang}">Мова</h6>
-            <div th:each="lang : ${allLanguages}" class="form-check">
-              <input class="form-check-input" type="checkbox" name="languages"
-                     th:value="${lang}"
-                     th:checked="${selectedLanguages != null and #lists.contains(selectedLanguages, lang)}"
-              > <label class="form-check-label" th:text="${lang}">UA</label>
-            </div>
-          </div>
-          <div class="mb-3">
-            <h6 class="fw-bold" th:text="#{catalog.filter.age}">Вікова група</h6>
-            <div th:each="ageGroup : ${allAgeGroups}" class="form-check">
-              <input class="form-check-input" type="checkbox" name="ageGroups"
-                     th:value="${ageGroup}"
-                     th:checked="${selectedAgeGroups != null and #lists.contains(selectedAgeGroups, ageGroup)}"
-              > <label class="form-check-label" th:text="${ageGroup}">ADULT</label>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6 class="fw-bold" th:text="#{catalog.filter.genre}">Жанр</h6>
-
-            <div style="max-height: 150px; overflow-y: auto;">
-              <div th:each="g : ${allGenres}" class="form-check">
-                <input class="form-check-input" type="checkbox" name="genres"
-                       th:value="${g}"
-                       th:checked="${selectedGenres != null and #lists.contains(selectedGenres, g)}">
-                <label class="form-check-label" th:text="${g}">Fantasy</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6 class="fw-bold" th:text="#{catalog.filter.author}">Автор</h6>
-            <div style="max-height: 150px; overflow-y: auto;">
-              <div th:each="a : ${allAuthors}" class="form-check">
-                <input class="form-check-input" type="checkbox" name="authors"
-                       th:value="${a}"
-                       th:checked="${selectedAuthors != null and #lists.contains(selectedAuthors, a)}">
-                <label class="form-check-label" th:text="${a}">Rowling</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6 class="fw-bold" th:text="#{catalog.filter.price}">Ціна (грн)</h6>
-            <div class="input-group input-group-sm mb-2">
-              <span class="input-group-text" th:text="#{catalog.filter.from}">від</span>
-              <input type="number" class="form-control" name="minPrice" th:value="${minPrice}" min="0">
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text" th:text="#{catalog.filter.to}">до</span>
-              <input type="number" class="form-control" name="maxPrice" th:value="${maxPrice}" min="0">
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
-          <a href="/books" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути все</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-9">
-
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
-
-        <div class="input-group" style="max-width: 400px;">
-          <input type="text" class="form-control" name="search"
-                 th:placeholder="#{catalog.search.placeholder}"
-                 placeholder="Пошук книги..." th:value="${search}">
-          <button class="btn btn-outline-primary" type="submit">
-            🔍
-          </button>
-        </div>
-
-        <div class="d-flex align-items-center gap-2">
-          <label class="text-muted small mb-0" th:text="#{catalog.sort.label}">Сортувати:</label>
-          <select class="form-select form-select-sm" name="sortField" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
-            <option value="name" th:selected="${sortField == 'name'}" th:text="#{catalog.sort.name}">За назвою</option>
-            <option value="price" th:selected="${sortField == 'price'}" th:text="#{catalog.sort.price}">За ціною</option>
-            <option value="publicationDate" th:selected="${sortField == 'publicationDate'}" th:text="#{catalog.sort.newest}">За новизною</option>
-          </select>
-
-          <select class="form-select form-select-sm" name="sortDir" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
-            <option value="asc" th:selected="${sortDir == 'asc'}" th:text="#{catalog.sort.asc}">Зростання</option>
-            <option value="desc" th:selected="${sortDir == 'desc'}" th:text="#{catalog.sort.desc}">Спаданная</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div th:if="${books.isEmpty()}" class="alert alert-info text-center" th:text="#{catalog.empty}">
-        За вашим запитом нічого не знайдено 😔
-      </div>
-
-      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        <div class="col" th:each="book : ${books}">
-          <div class="card h-100 shadow-sm border-0 hover-shadow transition">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="badge bg-info text-dark" th:text="${book.genre}">Fantasy</span>
-                <span class="badge border text-muted" th:text="${book.ageGroup}">TEEN</span>
-              </div>
-
-              <h5 class="card-title text-truncate" th:text="${book.name}" th:title="${book.name}">Назва</h5>
-              <p class="text-muted small mb-2" th:text="${book.author}">Автор</p>
-
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <h5 class="text-success mb-0 fw-bold" th:text="${book.price} + ' ₴'">200 ₴</h5>
-                <small class="text-muted" th:text="${book.language}">EN</small>
-              </div>
-            </div>
-
-            <div class="card-footer bg-white border-top-0 d-flex gap-2">
-              <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm w-100" th:text="#{catalog.btn.details}">Деталі</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav th:if="${totalPages > 1}" class="mt-5">
-        <ul class="pagination justify-content-center">
-          <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage - 1} + ')'">←</button>
-          </li>
-
-          <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-              th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
-              th:classappend="${currentPage == i} ? 'active'">
-            <button class="page-link" type="button"
-                    th:text="${i + 1}"
-                    th:onclick="'changePage(' + ${i} + ')'"></button>
-          </li>
-
-          <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-            <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage + 1} + ')'">→</button>
-          </li>
-        </ul>
-      </nav>
-
-    </div>
+  <div th:if="${param.msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="#{${param.msg[0]}}">Успіх</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
+
+  <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="#{${param.error[0]}}">Помилка</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <form th:action="@{/books}" method="get" id="filterForm" th:object="${filter}">
+
+    <input type="hidden" th:field="*{page}" id="pageInput">
+    <input type="hidden" th:field="*{size}">
+
+    <div class="row">
+      <div class="col-lg-3 mb-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
+          <div class="card-body">
+
+            <div class="mb-3">
+              <h6 class="fw-bold" th:text="#{catalog.filter.lang}">Мова</h6>
+              <div th:each="lang : ${allLanguages}" class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       th:field="*{languages}"
+                       th:value="${lang}">
+                <label class="form-check-label" th:text="${lang}" th:for="${#ids.prev('languages')}">UA</label>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold" th:text="#{catalog.filter.age}">Вікова група</h6>
+              <div th:each="ageGroup : ${allAgeGroups}" class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       th:field="*{ageGroups}"
+                       th:value="${ageGroup}">
+                <label class="form-check-label" th:text="${ageGroup}" th:for="${#ids.prev('ageGroups')}">ADULT</label>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold" th:text="#{catalog.filter.genre}">Жанр</h6>
+              <div style="max-height: 150px; overflow-y: auto;">
+                <div th:each="g : ${allGenres}" class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                         th:field="*{genres}"
+                         th:value="${g}">
+                  <label class="form-check-label" th:text="${g}" th:for="${#ids.prev('genres')}">Fantasy</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold" th:text="#{catalog.filter.author}">Автор</h6>
+              <div style="max-height: 150px; overflow-y: auto;">
+                <div th:each="a : ${allAuthors}" class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                         th:field="*{authors}"
+                         th:value="${a}">
+                  <label class="form-check-label" th:text="${a}" th:for="${#ids.prev('authors')}">Rowling</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold" th:text="#{catalog.filter.price}">Ціна (грн)</h6>
+              <div class="input-group input-group-sm mb-2">
+                <span class="input-group-text" th:text="#{catalog.filter.from}">від</span>
+                <input type="number" class="form-control" th:field="*{minPrice}" min="0">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text" th:text="#{catalog.filter.to}">до</span>
+                <input type="number" class="form-control" th:field="*{maxPrice}" min="0">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
+            <a href="/books" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути все</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+          <div class="input-group" style="max-width: 400px;">
+            <input type="text" class="form-control" th:field="*{search}"
+                   th:placeholder="#{catalog.search.placeholder}"
+                   placeholder="Пошук книги...">
+            <button class="btn btn-outline-primary" type="submit">🔍</button>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <label class="text-muted small mb-0" th:text="#{catalog.sort.label}">Сортувати:</label>
+
+            <select class="form-select form-select-sm" th:field="*{sortField}" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+              <option value="id" th:text="#{catalog.sort.default}">Замовчуванням</option>
+              <option value="name" th:text="#{catalog.sort.name}">За назвою</option>
+              <option value="price" th:text="#{catalog.sort.price}">За ціною</option>
+              <option value="publicationDate" th:text="#{catalog.sort.newest}">За новизною</option>
+            </select>
+
+            <select class="form-select form-select-sm" th:field="*{sortDir}" onchange="document.getElementById('filterForm').submit()" style="width: auto;">
+              <option value="asc" th:text="#{catalog.sort.asc}">Зростання</option>
+              <option value="desc" th:text="#{catalog.sort.desc}">Спаданная</option>
+            </select>
+          </div>
+        </div>
+
+        <div th:if="${books.isEmpty()}" class="alert alert-info text-center" th:text="#{catalog.empty}">
+          За вашим запитом нічого не знайдено 😔
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+          <div class="col" th:each="book : ${books}">
+            <div class="card h-100 shadow-sm border-0 hover-shadow transition">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <span class="badge bg-info text-dark" th:text="${book.genre}">Fantasy</span>
+                  <span class="badge border text-muted" th:text="${book.ageGroup}">TEEN</span>
+                </div>
+                <h5 class="card-title text-truncate" th:text="${book.name}" th:title="${book.name}">Назва</h5>
+                <p class="text-muted small mb-2" th:text="${book.author}">Автор</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <h5 class="text-success mb-0 fw-bold" th:text="${book.price} + ' ₴'">200 ₴</h5>
+                  <small class="text-muted" th:text="${book.language}">EN</small>
+                </div>
+              </div>
+              <div class="card-footer bg-white border-top-0 d-flex gap-2">
+                <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm w-100" th:text="#{catalog.btn.details}">Деталі</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav th:if="${totalPages > 1}" class="mt-5">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+              <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage - 1} + ')'">←</button>
+            </li>
+
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                th:classappend="${currentPage == i} ? 'active'">
+              <button class="page-link" type="button"
+                      th:text="${i + 1}"
+                      th:onclick="'changePage(' + ${i} + ')'"></button>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+              <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage + 1} + ')'">→</button>
+            </li>
+          </ul>
+        </nav>
+
+      </div>
+    </div>
   </form>
 </div>
 

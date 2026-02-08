@@ -1,31 +1,27 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.criteria.OrderSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
-import com.epam.rd.autocode.spring.project.service.BookService;
 import com.epam.rd.autocode.spring.project.service.CartService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,33 +29,19 @@ import java.util.List;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
+
     private final OrderService orderService;
-    private final BookService bookService;
     private final CartService cartService;
+
+    //todo
     private final UserRepository userRepository;
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/all")
-    public String allOrders(
-            Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        Pageable pageable = createPageable(page, size, sortField, sortDir);
-
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(
-                null, null, search, statuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
-
-        prepareOrdersModel(model, pageResult, sortField, sortDir, size, search, statuses, dateFrom, dateTo, minPrice, maxPrice);
+    public String allOrders(Model model, OrderSearchRequest request) {
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
+        populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Всі замовлення (Admin)");
 
         return "orders";
@@ -67,63 +49,26 @@ public class OrderController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/client/my")
-    public String myClientOrders(
-            Model model,
-            Principal principal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        User client = userRepository.findByEmail(principal.getName()).orElseThrow();
+    public String myClientOrders(Model model, Principal principal, OrderSearchRequest request) {
+        User client = getUserByPrincipal(principal);
+        request.setClientId(client.getId());
 
-        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
 
-        Page<OrderDTO> ordersPage = orderService.getFilteredOrders(
-                client.getId(),
-                null,
-                search, statuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
-
-        addCommonAttributes(model, ordersPage, sortField, sortDir, size, search, statuses, dateFrom, dateTo, minPrice, maxPrice);
+        populateModel(model, pageResult, request);
 
         return "orders";
     }
 
-
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/employee/my")
-    public String myEmployeeOrders(
-            Model model,
-            Principal principal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        User employee = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public String myEmployeeOrders(Model model, Principal principal, OrderSearchRequest request) {
+        User employee = getUserByPrincipal(principal);
+        request.setEmployeeId(employee.getId());
 
-        Pageable pageable = createPageable(page, size, sortField, sortDir);
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
 
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(
-                null, employee.getId(), search, statuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
-
-        prepareOrdersModel(model, pageResult, sortField, sortDir, size, search, statuses, dateFrom, dateTo, minPrice, maxPrice);
+        populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Мої замовлення");
 
         return "orders";
@@ -131,106 +76,26 @@ public class OrderController {
 
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/available")
-    public String availableOrders(
-            Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        Pageable pageable = createPageable(page, size, sortField, sortDir);
-        List<OrderStatus> targetStatuses = List.of(OrderStatus.NEW);
+    public String availableOrders(Model model, OrderSearchRequest request) {
+        if (request.getStatuses() == null || request.getStatuses().isEmpty()) {
+            request.setStatuses(List.of(OrderStatus.NEW));
+        }
 
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(
-                null, null, search, targetStatuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
 
-        prepareOrdersModel(model, pageResult, sortField, sortDir, size, search, targetStatuses, dateFrom, dateTo, minPrice, maxPrice);
+        populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Доступні замовлення");
 
         return "orders";
     }
 
-    @PreAuthorize("hasRole('EMPLOYEE')")
-    @PostMapping("/{id}/take")
-    public String takeOrder(@PathVariable Long id, Model model, Principal principal, HttpServletRequest request) {
-        String currentUsername = principal.getName();
-
-        orderService.takeOrder(id, currentUsername);
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/orders/available");
-    }
-
-
-    @PreAuthorize("hasRole('EMPLOYEE')")
-    @PostMapping("/{id}/refuse")
-    public String refuseOrder(@PathVariable Long id, Model model, Principal principal, HttpServletRequest request) {
-        String currentUsername = principal.getName();
-
-        orderService.updateStatus(id, OrderStatus.NEW , currentUsername);
-
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/orders/employee/my");
-    }
-
-    @PreAuthorize("hasRole('EMPLOYEE')")
-    @PostMapping("/{id}/canceled")
-    public String canceledOrder(@PathVariable Long id, Principal principal, HttpServletRequest request) {
-        String currentUsername = principal.getName();
-
-        orderService.refund(id, currentUsername);
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/orders/employee/my");
-    }
-
-    @PreAuthorize("hasRole('EMPLOYEE')")
-    @PostMapping("/{id}/deliver")
-    public String deliverOrder(@PathVariable Long id, Model model, Principal principal, HttpServletRequest request) {
-        String currentUsername = principal.getName();
-        orderService.deliver(id, currentUsername);
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/orders/employee/my");
-    }
-
-    @PreAuthorize("hasRole('CLIENT')")
-    @PostMapping("/{id}/client/canceled")
-    public String canceledOrderByClient(@PathVariable Long id, Principal principal, HttpServletRequest request) {
-        String currentUsername = principal.getName();
-        orderService.refund(id, currentUsername);
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/orders/client/my");
-    }
-
-
-
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/employee/{id}")
-    public String getAllOrdersByEmployee(
-            @PathVariable("id") Long id,
-            Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        Pageable pageable = createPageable(page, size, sortField, sortDir);
+    public String getAllOrdersByEmployee(@PathVariable("id") Long id, Model model, OrderSearchRequest request) {
+        request.setEmployeeId(id);
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
 
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(
-                null, id, search, statuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
-
-        prepareOrdersModel(model, pageResult, sortField, sortDir, size, search, statuses, dateFrom, dateTo, minPrice, maxPrice);
+        populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Замовлення працівника #" + id);
 
         return "orders";
@@ -238,27 +103,11 @@ public class OrderController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @GetMapping("/client/{id}")
-    public String getAllOrderByClient(
-            @PathVariable("id") Long id,
-            Model model,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        Pageable pageable = createPageable(page, size, sortField, sortDir);
+    public String getAllOrdersByClient(@PathVariable("id") Long id, Model model, OrderSearchRequest request) {
+        request.setClientId(id);
+        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
 
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(
-                id, null, search, statuses, dateFrom, dateTo, minPrice, maxPrice, pageable
-        );
-
-        prepareOrdersModel(model, pageResult, sortField, sortDir, size, search, statuses, dateFrom, dateTo, minPrice, maxPrice);
+        populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Замовлення клієнта #" + id);
 
         return "orders";
@@ -266,9 +115,10 @@ public class OrderController {
 
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN', 'CLIENT')")
     @GetMapping("/{id}/details")
-    public String getOrderDetails(@PathVariable("id") Long id, Model model,  Principal principal, Authentication authentication) {
+    public String getOrderDetails(@PathVariable("id") Long id, Model model, Principal principal, Authentication authentication) {
         OrderDTO order = orderService.getOrderById(id);
         String currentUsername = principal.getName();
+
         boolean isAdminOrEmployee = authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")
                         || role.getAuthority().equals("ROLE_EMPLOYEE"));
@@ -282,24 +132,91 @@ public class OrderController {
     }
 
 
-    @PreAuthorize("hasRole('CLIENT')")
-    @PostMapping("/add")
-    public String addOrder(@Valid @ModelAttribute("orderDTO") OrderDTO orderDTO, BindingResult result, Principal principal){
-        if (result.hasErrors()) {
-            return "orders";
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/take")
+    public String takeOrder(@PathVariable Long id, Principal principal,
+                            OrderSearchRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.takeOrder(id, principal.getName());
+            redirectAttributes.addAttribute("msg", "order.take.success");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "order.take.error");
         }
-        orderService.addOrder(orderDTO, principal.getName());
-        return "redirect:/orders/basket";
+
+        fillRedirectAttributes(redirectAttributes, request);
+        return "redirect:/orders/available";
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/refuse")
+    public String refuseOrder(@PathVariable Long id, Principal principal,
+                              OrderSearchRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.updateStatus(id, OrderStatus.NEW, principal.getName());
+            redirectAttributes.addAttribute("msg", "order.refuse.success");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "order.refuse.error");
+        }
+
+        fillRedirectAttributes(redirectAttributes, request);
+        return "redirect:/orders/employee/my";
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/canceled")
+    public String canceledOrder(@PathVariable Long id, Principal principal,
+                                OrderSearchRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.refund(id, principal.getName());
+            redirectAttributes.addAttribute("msg", "order.cancel.success");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "order.cancel.error");
+        }
+
+        fillRedirectAttributes(redirectAttributes, request);
+        return "redirect:/orders/employee/my";
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PostMapping("/{id}/deliver")
+    public String deliverOrder(@PathVariable Long id, Principal principal,
+                               OrderSearchRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.deliver(id, principal.getName());
+            redirectAttributes.addAttribute("msg", "order.deliver.success");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "order.deliver.error");
+        }
+
+        fillRedirectAttributes(redirectAttributes, request);
+        return "redirect:/orders/employee/my";
+    }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/{id}/client/canceled")
+    public String canceledOrderByClient(@PathVariable Long id, Principal principal,
+                                        OrderSearchRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.refund(id, principal.getName());
+            redirectAttributes.addAttribute("msg", "order.cancel.success");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", "order.cancel.error");
+        }
+
+        fillRedirectAttributes(redirectAttributes, request);
+        return "redirect:/orders/client/my";
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/add")
     public String addToBasket(@RequestParam("bookId") Long bookId,
                               @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
-                              Principal principal) {
+                              Principal principal, RedirectAttributes redirectAttributes) {
         cartService.addItemToCart(principal.getName(), bookId, quantity);
+        redirectAttributes.addAttribute("msg", "basket.add.success");
         return "redirect:/books/" + bookId;
     }
+
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/update")
     public String updateBasketQuantity(@RequestParam("bookId") Long bookId,
@@ -310,22 +227,23 @@ public class OrderController {
         cartService.updateQuantity(principal.getName(), bookId, quantity);
         return "redirect:/orders/basket?page=" + page + "&size=" + size;
     }
+
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/basket/remove")
-    public String removeFromBasket(@RequestParam("bookId") Long bookId, Principal principal, @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "5") int size) {
+    public String removeFromBasket(@RequestParam("bookId") Long bookId, Principal principal,
+                                   @RequestParam(value = "page", defaultValue = "0") int page,
+                                   @RequestParam(value = "size", defaultValue = "5") int size,
+                                   RedirectAttributes redirectAttributes) {
         cartService.removeItem(principal.getName(), bookId);
+        redirectAttributes.addAttribute("msg", "basket.remove.success");
         return "redirect:/orders/basket?page=" + page + "&size=" + size;
     }
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/basket")
-    public String showBasket(
-            Model model,
-            Principal principal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-
+    public String showBasket(Model model, Principal principal,
+                             @RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "5") int size) {
         String email = principal.getName();
         Pageable pageable = PageRequest.of(page, size);
 
@@ -334,7 +252,6 @@ public class OrderController {
 
         model.addAttribute("items", cartPage.getContent());
         model.addAttribute("totalPrice", totalPrice);
-
         model.addAttribute("currentPage", cartPage.getNumber());
         model.addAttribute("totalPages", cartPage.getTotalPages());
         model.addAttribute("totalItems", cartPage.getTotalElements());
@@ -345,13 +262,13 @@ public class OrderController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
-    public String createOrder(Principal principal) {
+    public String createOrder(Principal principal, RedirectAttributes redirectAttributes) {
         String email = principal.getName();
-
         List<BookItemDTO> allItems = cartService.getAllCartItems(email);
 
         if (allItems.isEmpty()) {
-            return "redirect:/orders/basket?error=empty";
+            redirectAttributes.addAttribute("error", "order.create.empty");
+            return "redirect:/orders/basket";
         }
 
         OrderDTO orderDTO = new OrderDTO();
@@ -360,81 +277,68 @@ public class OrderController {
         try {
             orderService.addOrder(orderDTO, email);
             cartService.clearCart(email);
+            redirectAttributes.addAttribute("msg", "order.create.success");
         } catch (RuntimeException e) {
             if ("error.not_enough_money".equals(e.getMessage())) {
-                return "redirect:/orders/basket?error=not_enough_money";
+                redirectAttributes.addAttribute("error", "not_enough_money");
+            } else {
+                redirectAttributes.addAttribute("error", "generic_error");
             }
-
-            return "redirect:/orders/basket?error=generic_error";
+            return "redirect:/orders/basket";
         }
 
         return "redirect:/orders/client/my";
     }
 
-    private void addCommonAttributes(Model model, Page<OrderDTO> page, String sortField, String sortDir, int size,
-                                     String search, List<OrderStatus> statuses, LocalDate dateFrom, LocalDate dateTo,
-                                     BigDecimal minPrice, BigDecimal maxPrice) {
+
+    private User getUserByPrincipal(Principal principal) {
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void populateModel(Model model, Page<OrderDTO> page, OrderSearchRequest request) {
         model.addAttribute("orders", page.getContent());
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
-
         model.addAttribute("allStatuses", OrderStatus.values());
+        model.addAttribute("size", request.getSize());
+        model.addAttribute("sortField", request.getSortField());
+        model.addAttribute("sortDir", request.getSortDir());
+        model.addAttribute("reverseSortDir", request.getReverseSortDir());
+        model.addAttribute("search", request.getSearch());
 
-        model.addAttribute("selectedStatuses", statuses);
-        model.addAttribute("dateFrom", dateFrom);
-        model.addAttribute("dateTo", dateTo);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortDir", sortDir);
-        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
-        model.addAttribute("size", size);
-    }
-
-    private Pageable createPageable(int page, int size, String sortField, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortField).ascending()
-                : Sort.by(sortField).descending();
-        return PageRequest.of(page, size, sort);
+        model.addAttribute("minPrice", request.getMinPrice());
+        model.addAttribute("maxPrice", request.getMaxPrice());
+        model.addAttribute("dateFrom", request.getDateFrom());
+        model.addAttribute("dateTo", request.getDateTo());
+        model.addAttribute("selectedStatuses", request.getStatuses());
     }
 
 
+    private void fillRedirectAttributes(RedirectAttributes redirectAttributes, OrderSearchRequest request) {
+        redirectAttributes.addAttribute("page", request.getPage());
+        redirectAttributes.addAttribute("size", request.getSize());
+        redirectAttributes.addAttribute("sortField", request.getSortField());
+        redirectAttributes.addAttribute("sortDir", request.getSortDir());
 
-    private void prepareOrdersModel(
-            Model model,
-            Page<OrderDTO> page,
-            String sortField,
-            String sortDir,
-            int size,
-            String search,
-            List<OrderStatus> statuses,
-            LocalDate dateFrom,
-            LocalDate dateTo,
-            BigDecimal minPrice,
-            BigDecimal maxPrice
-    ) {
-        model.addAttribute("orders", page.getContent());
-        model.addAttribute("currentPage", page.getNumber());
-        model.addAttribute("totalPages", page.getTotalPages());
-        model.addAttribute("totalItems", page.getTotalElements());
-
-        model.addAttribute("allStatuses", OrderStatus.values());
-
-        model.addAttribute("search", search);
-        model.addAttribute("selectedStatuses", statuses);
-        model.addAttribute("dateFrom", dateFrom);
-        model.addAttribute("dateTo", dateTo);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
-
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortDir", sortDir);
-        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
-        model.addAttribute("size", size);
+        if (request.getSearch() != null && !request.getSearch().isEmpty()) {
+            redirectAttributes.addAttribute("search", request.getSearch());
+        }
+        if (request.getDateFrom() != null) {
+            redirectAttributes.addAttribute("dateFrom", request.getDateFrom());
+        }
+        if (request.getDateTo() != null) {
+            redirectAttributes.addAttribute("dateTo", request.getDateTo());
+        }
+        if (request.getMinPrice() != null) {
+            redirectAttributes.addAttribute("minPrice", request.getMinPrice());
+        }
+        if (request.getMaxPrice() != null) {
+            redirectAttributes.addAttribute("maxPrice", request.getMaxPrice());
+        }
+        if (request.getStatuses() != null && !request.getStatuses().isEmpty()) {
+            redirectAttributes.addAttribute("statuses", request.getStatuses());
+        }
     }
-
-
-
-
 }

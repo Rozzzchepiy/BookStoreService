@@ -1,52 +1,51 @@
 package com.epam.rd.autocode.spring.project.spec;
 
+import com.epam.rd.autocode.spring.project.criteria.BookSearchRequest;
 import com.epam.rd.autocode.spring.project.model.Book;
-import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
-import com.epam.rd.autocode.spring.project.model.enums.Language;
-import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookSpecification {
 
-    public static Specification<Book> filterBooks(String search, List<String> authors, List<String> genres,
-                                                  List<Language> languages, List<AgeGroup> ageGroups, BigDecimal minPrice, BigDecimal maxPrice) {
+    public static Specification<Book> filterBooks(BookSearchRequest request) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (search != null && !search.isEmpty()) {
-                String pattern = "%" + search.toLowerCase() + "%";
+            if (StringUtils.hasText(request.getSearch())) {
+                String pattern = "%" + request.getSearch().toLowerCase() + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("name")), pattern),
-                        cb.like(cb.lower(root.get("description")), pattern)
+                        cb.like(cb.lower(root.get("description")), pattern),
+                        cb.like(cb.lower(root.get("author")), pattern)
                 ));
             }
 
-            if (authors != null && !authors.isEmpty()) {
-                predicates.add(root.get("author").in(authors));
+            if (request.getAuthors() != null && !request.getAuthors().isEmpty()) {
+                predicates.add(root.get("author").in(request.getAuthors()));
             }
 
-            if (genres != null && !genres.isEmpty()) {
-                predicates.add(root.get("genre").in(genres));
+            if (request.getGenres() != null && !request.getGenres().isEmpty()) {
+                predicates.add(root.get("genre").in(request.getGenres()));
             }
 
-            if (ageGroups != null && !ageGroups.isEmpty()) {
-                predicates.add(root.get("ageGroup").in(ageGroups));
+            if (request.getLanguages() != null && !request.getLanguages().isEmpty()) {
+                predicates.add(root.get("language").in(request.getLanguages()));
             }
 
-            if (languages != null && !languages.isEmpty()) {
-                predicates.add(root.get("language").in(languages));
+            if (request.getAgeGroups() != null && !request.getAgeGroups().isEmpty()) {
+                predicates.add(root.get("ageGroup").in(request.getAgeGroups()));
             }
 
-            if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+            if (request.getMinPrice() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), request.getMinPrice()));
             }
 
-            if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+            if (request.getMaxPrice() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("price"), request.getMaxPrice()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

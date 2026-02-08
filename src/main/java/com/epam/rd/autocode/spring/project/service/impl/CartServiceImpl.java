@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
+import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.model.CartItem;
 import com.epam.rd.autocode.spring.project.model.User;
@@ -42,7 +43,7 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(item);
         } else {
             Book book = bookRepository.findById(bookId)
-                    .orElseThrow(() -> new RuntimeException("Book not found"));
+                    .orElseThrow(() -> new NotFoundException("Book not found"));
             CartItem newItem = new CartItem();
             newItem.setUser(user);
             newItem.setBook(book);
@@ -60,7 +61,7 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.deleteByUserAndBookId(user, bookId);
         } else {
             CartItem item = cartItemRepository.findByUserAndBookId(user, bookId)
-                    .orElseThrow(() -> new RuntimeException("Item not found"));
+                    .orElseThrow(() -> new NotFoundException("Item not found"));
             item.setQuantity(newQuantity);
             cartItemRepository.save(item);
         }
@@ -107,13 +108,13 @@ public class CartServiceImpl implements CartService {
     @Transactional(readOnly = true)
     public boolean isBookInCart(String userEmail, Long bookId) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         return cartItemRepository.findByUserAndBookId(user, bookId).isPresent();
     }
 
     private User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     private BookItemDTO mapToDTO(CartItem cartItem) {

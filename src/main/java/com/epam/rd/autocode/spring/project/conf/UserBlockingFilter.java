@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,10 +17,13 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
 public class UserBlockingFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
+
+    public UserBlockingFilter(@Lazy UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

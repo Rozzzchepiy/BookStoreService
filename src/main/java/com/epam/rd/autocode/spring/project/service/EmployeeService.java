@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service;
 
+import com.epam.rd.autocode.spring.project.criteria.EmployeeSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import org.springframework.data.domain.Page;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface EmployeeService {
 
-    Page<EmployeeDTO> getAllEmployees(Pageable pageable, String keyword);
+    Page<EmployeeDTO> getAllEmployees(EmployeeSearchRequest request);
 
     EmployeeDTO getEmployeeById(Long id);
 

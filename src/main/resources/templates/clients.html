@@ -10,25 +10,28 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 th:text="#{clients.title}">Список клієнтів</h2>
 
-    <form class="d-flex" role="search" th:action="@{/clients}" method="get">
-      <input class="form-control me-2" type="search" name="keyword"
-             th:value="${keyword}" th:placeholder="#{clients.search_placeholder}" aria-label="Search">
+    <form class="d-flex" role="search" th:action="@{/clients}" method="get" th:object="${filter}">
+
+      <input class="form-control me-2" type="search"
+             th:field="*{keyword}"
+             th:placeholder="#{clients.search_placeholder}" aria-label="Search">
 
       <button class="btn btn-outline-success" type="submit" th:text="#{common.btn.search}">Пошук</button>
 
-      <a th:if="${keyword != null && !keyword.isEmpty()}" th:href="@{/clients}"
+      <a th:if="${filter.keyword != null && !filter.keyword.isEmpty()}" th:href="@{/clients}"
          class="btn btn-outline-secondary ms-2" th:text="#{common.btn.reset}">Скинути</a>
     </form>
   </div>
 
-  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+  <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    <span th:text="#{${error}}">Текст помилки</span>
+    <span th:text="#{${param.error[0]}}">Текст помилки</span>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
-  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+
+  <div th:if="${param.msg}" class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle-fill me-2"></i>
-    <span th:text="${success}">Успіх</span>
+    <span th:text="#{${param.msg[0]}}">Успіх</span>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 
@@ -58,15 +61,19 @@
           <div class="d-flex gap-1">
             <a th:href="@{/clients/{id}(id=${c.id})}" class="btn btn-outline-primary btn-sm" th:text="#{client.btn.details}">Деталі</a>
 
-            <form th:if="${!c.blocked}" th:action="@{/clients/{id}/block(id=${c.id})}" method="post">
+            <form th:if="${!c.blocked}"
+                  th:action="@{/clients/{id}/status(id=${c.id}, blocked=true, page=${clients.number}, keyword=${filter.keyword})}"
+                  method="post">
               <button type="submit" class="btn btn-sm btn-warning" th:text="#{client.btn.block}">Блок</button>
             </form>
 
-            <form th:if="${c.blocked}" th:action="@{/clients/{id}/unblock(id=${c.id})}" method="post">
+            <form th:if="${c.blocked}"
+                  th:action="@{/clients/{id}/status(id=${c.id}, blocked=false, page=${clients.number}, keyword=${filter.keyword})}"
+                  method="post">
               <button type="submit" class="btn btn-sm btn-success" th:text="#{client.btn.unblock}">Розблок</button>
             </form>
 
-            <form th:action="@{/clients/delete/{id}(id=${c.id}, page=${clients.number}, keyword=${keyword})}"
+            <form th:action="@{/clients/delete/{id}(id=${c.id}, page=${clients.number}, keyword=${filter.keyword})}"
                   method="post"
                   th:attr="onsubmit='return confirm(\'' + #{client.confirm_delete} + '\');'">
               <button type="submit" class="btn btn-sm btn-danger" th:text="#{client.btn.delete}">Видалити</button>
@@ -85,18 +92,18 @@
     <ul class="pagination justify-content-center">
 
       <li class="page-item" th:classappend="${clients.first} ? 'disabled'">
-        <a class="page-link" th:href="@{/clients(page=${clients.number - 1}, keyword=${keyword})}" aria-label="Previous">
+        <a class="page-link" th:href="@{/clients(page=${clients.number - 1}, keyword=${filter.keyword})}" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
 
       <li class="page-item" th:each="i : ${#numbers.sequence(0, clients.totalPages - 1)}"
           th:classappend="${i == clients.number} ? 'active'">
-        <a class="page-link" th:href="@{/clients(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+        <a class="page-link" th:href="@{/clients(page=${i}, keyword=${filter.keyword})}" th:text="${i + 1}">1</a>
       </li>
 
       <li class="page-item" th:classappend="${clients.last} ? 'disabled'">
-        <a class="page-link" th:href="@{/clients(page=${clients.number + 1}, keyword=${keyword})}" aria-label="Next">
+        <a class="page-link" th:href="@{/clients(page=${clients.number + 1}, keyword=${filter.keyword})}" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
         </a>
       </li>

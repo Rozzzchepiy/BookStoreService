@@ -22,8 +22,10 @@
 
           <form th:action="@{/profile/topup}" method="post">
 
-            <div th:if="${error}" class="alert alert-danger">
-              <span th:text="#{${error}}">Помилка</span>
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+              <i class="bi bi-exclamation-circle-fill me-2"></i>
+              <span th:text="#{${param.error[0]}}">Помилка</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
             <div class="mb-4">
@@ -36,17 +38,17 @@
                        class="form-control form-control-lg"
                        th:placeholder="#{topup.placeholder_amount}"
                        placeholder="0.00"
-                       step="0.01">
+                       >
               </div>
               <div class="form-text" th:text="#{topup.help_min}">Мінімальна сума поповнення — 1 грн.</div>
             </div>
 
             <div class="d-grid gap-2">
-              <button type="button" class="btn btn-secondary" onclick="history.back()">
-                Скасувати
+              <button type="submit" class="btn btn-success btn-lg" th:text="#{topup.btn_submit}">
+                Поповнити
               </button>
 
-              <a href="#" onclick="history.back(); return false;" class="btn btn-secondary">
+              <a href="/profile" class="btn btn-secondary" onclick="if (history.length > 1) { event.preventDefault(); history.back(); }" th:text="#{topup.btn_cancel}">
                 Скасувати
               </a>
             </div>
