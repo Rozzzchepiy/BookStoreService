@@ -4,6 +4,7 @@ import com.epam.rd.autocode.spring.project.annotation.Loggable;
 import com.epam.rd.autocode.spring.project.criteria.OrderSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
+import com.epam.rd.autocode.spring.project.exception.NotEnoughMoneyException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.model.BookItem;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
     private final UserRepository userRepository;
@@ -158,6 +160,20 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+    @Override
+    public Page<OrderDTO> getMyOrders(String email, OrderSearchRequest request) {
+        User client = getUserByEmail(email);
+        request.setClientId(client.getId());
+        return getFilteredOrders(request);
+    }
+
+    @Override
+    public Page<OrderDTO> getMyWorkOrders(String email, OrderSearchRequest request) {
+        User employee = getUserByEmail(email);
+        request.setEmployeeId(employee.getId());
+        return getFilteredOrders(request);
+    }
+
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found: " + email));
@@ -195,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
     private void processPayment(User client, BigDecimal amount) {
         BigDecimal currentBalance = client.getClientProfile().getBalance();
         if (currentBalance.compareTo(amount) < 0) {
-            throw new RuntimeException("error.not_enough_money");
+            throw new NotEnoughMoneyException("error.not_enough_money");
         }
         client.getClientProfile().setBalance(currentBalance.subtract(amount));
         userRepository.save(client);

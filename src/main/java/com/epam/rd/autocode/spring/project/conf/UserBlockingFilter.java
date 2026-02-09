@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class UserBlockingFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
@@ -35,21 +36,40 @@ public class UserBlockingFilter extends OncePerRequestFilter {
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
 
             String email = auth.getName();
+
+            log.debug("BLOCKING_FILTER: Checking status for user: {}", email);
+
             Optional<User> userOptional = userRepository.findByEmail(email);
 
-            if (userOptional.isPresent() && userOptional.get().isBlocked()) {
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                boolean isLockedByTime = user.getLockTime() != null && user.getLockTime().isAfter(java.time.LocalDateTime.now());
 
-                SecurityContextHolder.clearContext();
+                if (user.isBlocked() || isLockedByTime) {
 
-                if (request.getSession(false) != null) {
-                    request.getSession(false).invalidate();
+                    log.warn("SECURITY ALERT: Blocked user '{}' tried to access system. Reason: Blocked={}, LockedByTime={}. Terminating session.",
+                            email, user.isBlocked(), isLockedByTime);
+
+                    SecurityContextHolder.clearContext();
+
+                    removeCookie(response, "accessToken");
+                    removeCookie(response, "refreshToken");
+
+                    response.sendRedirect("/login?error=blocked");
+                    return;
                 }
-
-                response.sendRedirect("/login?error");
-                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void removeCookie(HttpServletResponse response, String name) {
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
     }
 }

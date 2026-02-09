@@ -116,10 +116,9 @@
                             <input type="number" value="1" disabled class="form-control">
                         </div>
 
-                        <a th:href="@{/books/{id}/buy-intent(id=${book.id})}"
-                           class="btn btn-success">
-                            <i class="bi bi-cart-plus"></i> <span th:text="#{book.add_to_cart_btn}">Купити</span>
-                        </a>
+
+                        <a th:href="@{/login(redirect='/books/' + ${book.id} + '/buy-intent')}" class="btn btn-primary" th:text="#{book.add_to_cart_btn}">Купити</a>
+
                     </div>
                     <div class="text-muted small mt-1">
                         * <span th:text="#{login.required_hint} ?: 'Необхідно увійти'">Потрібен вхід</span>

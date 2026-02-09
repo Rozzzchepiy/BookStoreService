@@ -3,9 +3,8 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.criteria.OrderSearchRequest;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
-import com.epam.rd.autocode.spring.project.model.User;
+import com.epam.rd.autocode.spring.project.exception.NotEnoughMoneyException;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
-import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.CartService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,6 @@ public class OrderController {
     private final OrderService orderService;
     private final CartService cartService;
 
-    //todo
-    private final UserRepository userRepository;
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/all")
@@ -50,27 +46,17 @@ public class OrderController {
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/client/my")
     public String myClientOrders(Model model, Principal principal, OrderSearchRequest request) {
-        User client = getUserByPrincipal(principal);
-        request.setClientId(client.getId());
-
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
-
+        Page<OrderDTO> pageResult = orderService.getMyOrders(principal.getName(), request);
         populateModel(model, pageResult, request);
-
         return "orders";
     }
 
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/employee/my")
     public String myEmployeeOrders(Model model, Principal principal, OrderSearchRequest request) {
-        User employee = getUserByPrincipal(principal);
-        request.setEmployeeId(employee.getId());
-
-        Page<OrderDTO> pageResult = orderService.getFilteredOrders(request);
-
+        Page<OrderDTO> pageResult = orderService.getMyWorkOrders(principal.getName(), request);
         populateModel(model, pageResult, request);
         model.addAttribute("pageTitle", "Мої замовлення");
-
         return "orders";
     }
 
@@ -278,12 +264,8 @@ public class OrderController {
             orderService.addOrder(orderDTO, email);
             cartService.clearCart(email);
             redirectAttributes.addAttribute("msg", "order.create.success");
-        } catch (RuntimeException e) {
-            if ("error.not_enough_money".equals(e.getMessage())) {
-                redirectAttributes.addAttribute("error", "not_enough_money");
-            } else {
-                redirectAttributes.addAttribute("error", "generic_error");
-            }
+        } catch (NotEnoughMoneyException e) {
+            redirectAttributes.addAttribute("error", "not_enough_money");
             return "redirect:/orders/basket";
         }
 
@@ -291,10 +273,6 @@ public class OrderController {
     }
 
 
-    private User getUserByPrincipal(Principal principal) {
-        return userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
 
     private void populateModel(Model model, Page<OrderDTO> page, OrderSearchRequest request) {
         model.addAttribute("orders", page.getContent());

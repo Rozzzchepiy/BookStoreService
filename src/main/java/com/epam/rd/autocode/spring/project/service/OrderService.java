@@ -20,4 +20,7 @@ public interface OrderService {
 
     void deliver(Long id, String currentUsername);
     Page<OrderDTO> getFilteredOrders(OrderSearchRequest request);
+
+    Page<OrderDTO> getMyOrders(String email, OrderSearchRequest request);
+    Page<OrderDTO> getMyWorkOrders(String email, OrderSearchRequest request);
 }

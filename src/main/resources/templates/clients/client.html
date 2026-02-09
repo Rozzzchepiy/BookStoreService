@@ -22,7 +22,7 @@
                         <dd class="col-sm-8" th:text="${client.id}">5</dd>
 
                         <dt class="col-sm-4 text-muted" th:text="#{client.name}">Ім'я:</dt>
-                        <dd class="col-sm-8 fw-bold" th:text="${client.name}">Олена Петрівна</dd>
+                        <dd class="col-sm-8 fw-bold" th:text="${client.name}">ім'я</dd>
 
                         <dt class="col-sm-4 text-muted" th:text="#{client.email}">Email:</dt>
                         <dd class="col-sm-8" th:text="${client.email}">client@mail.com</dd>
@@ -49,6 +49,13 @@
 
                             <form th:if="${client.blocked}" th:action="@{/clients/{id}/unblock(id=${client.id})}" method="post" style="display:inline;">
                                 <button type="submit" class="btn btn-success ms-2" th:text="#{client.btn.unblock}">Розблокувати клієнта</button>
+                            </form>
+
+                            <form th:action="@{/clients/delete/{id}(id=${client.id})}"
+                                  method="post"
+                                  th:attr="onsubmit='return confirm(\'' + #{client.confirm_delete} + '\');'">
+
+                                <button type="submit" class="btn btn-sm btn-danger" th:text="#{client.btn.delete}">Видалити</button>
                             </form>
                         </div>
 

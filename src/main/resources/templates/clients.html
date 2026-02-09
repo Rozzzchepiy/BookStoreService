@@ -73,11 +73,6 @@
               <button type="submit" class="btn btn-sm btn-success" th:text="#{client.btn.unblock}">Розблок</button>
             </form>
 
-            <form th:action="@{/clients/delete/{id}(id=${c.id}, page=${clients.number}, keyword=${filter.keyword})}"
-                  method="post"
-                  th:attr="onsubmit='return confirm(\'' + #{client.confirm_delete} + '\');'">
-              <button type="submit" class="btn btn-sm btn-danger" th:text="#{client.btn.delete}">Видалити</button>
-            </form>
           </div>
         </td>
       </tr>

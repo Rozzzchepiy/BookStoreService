@@ -7,9 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Додай цей імпорт
 
 import java.time.LocalDateTime;
-
 
 @Service
 @RequiredArgsConstructor
@@ -18,17 +18,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         if (user.getLockTime() != null) {
-            if (!user.getLockTime().isBefore(LocalDateTime.now())) {
-            } else {
+            if (user.getLockTime().isBefore(LocalDateTime.now())) {
                 user.setLockTime(null);
                 user.setFailedAttempt(0);
                 userRepository.save(user);
             }
         }
+
         boolean accountLocked = user.isBlocked() || (user.getLockTime() != null);
 
         return org.springframework.security.core.userdetails.User.builder()
@@ -38,8 +40,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                         .map(Enum::name)
                         .toArray(String[]::new))
                 .accountLocked(accountLocked)
-                .accountLocked(accountLocked)
                 .build();
-
     }
 }
