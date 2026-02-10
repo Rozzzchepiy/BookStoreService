@@ -3,8 +3,6 @@ package com.epam.rd.autocode.spring.project.service.impl;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,12 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
@@ -27,41 +25,90 @@ class CustomUserDetailsServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private CustomUserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
 
-    private User user;
-
-    @BeforeEach
-    void setUp() {
-        user = new User();
-        user.setId(1L);
-        user.setEmail("test@email.com");
-        user.setPassword("hashed_password");
+    @Test
+    void loadUserByUsername_ShouldReturnUserDetails_WhenUserExistsAndActive() {
+        String email = "test@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
         user.setRoles(Set.of(Role.CLIENT));
+        user.setBlocked(false);
+        user.setLockTime(null);
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        assertNotNull(userDetails);
+        assertEquals(email, userDetails.getUsername());
+        assertEquals("password", userDetails.getPassword());
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT")));
+        assertTrue(userDetails.isAccountNonLocked());
     }
 
     @Test
-    @DisplayName("Should successfully load user details when user exists")
-    void loadUserByUsername_Success() {
-        when(userRepository.findByEmail("test@email.com")).thenReturn(Optional.of(user));
+    void loadUserByUsername_ShouldThrowException_WhenUserNotFound() {
+        String email = "unknown@test.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername("test@email.com");
-
-        assertThat(userDetails).isNotNull();
-        assertThat(userDetails.getUsername()).isEqualTo("test@email.com");
-        assertThat(userDetails.getPassword()).isEqualTo("hashed_password");
-
-        assertThat(userDetails.getAuthorities())
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+        assertThrows(UsernameNotFoundException.class, () -> customUserDetailsService.loadUserByUsername(email));
     }
 
     @Test
-    @DisplayName("Should throw UsernameNotFoundException when user does not exist")
-    void loadUserByUsername_NotFound() {
-        when(userRepository.findByEmail("unknown@email.com")).thenReturn(Optional.empty());
+    void loadUserByUsername_ShouldReturnLockedAccount_WhenUserIsBlocked() {
+        String email = "blocked@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRoles(Set.of(Role.CLIENT));
+        user.setBlocked(true);
+        user.setLockTime(null);
 
-        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("unknown@email.com"))
-                .isInstanceOf(UsernameNotFoundException.class)
-                .hasMessage("User not found");
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        assertFalse(userDetails.isAccountNonLocked());
+    }
+
+    @Test
+    void loadUserByUsername_ShouldReturnLockedAccount_WhenLockTimeIsFuture() {
+        String email = "locked@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRoles(Set.of(Role.CLIENT));
+        user.setBlocked(false);
+        user.setLockTime(LocalDateTime.now().plusMinutes(10));
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        assertFalse(userDetails.isAccountNonLocked());
+    }
+
+    @Test
+    void loadUserByUsername_ShouldUnlockAndReturnActive_WhenLockTimeIsPast() {
+        String email = "expired@test.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRoles(Set.of(Role.CLIENT));
+        user.setBlocked(false);
+        user.setFailedAttempt(5);
+        user.setLockTime(LocalDateTime.now().minusMinutes(1));
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        assertNull(user.getLockTime());
+        assertEquals(0, user.getFailedAttempt());
+        assertTrue(userDetails.isAccountNonLocked());
+        verify(userRepository).save(user);
     }
 }

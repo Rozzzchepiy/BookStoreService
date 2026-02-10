@@ -3,8 +3,8 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.model.RefreshToken;
 import com.epam.rd.autocode.spring.project.service.ClientService;
-import com.epam.rd.autocode.spring.project.service.impl.JwtService;
-import com.epam.rd.autocode.spring.project.service.impl.RefreshTokenService;
+import com.epam.rd.autocode.spring.project.service.RefreshTokenService;
+import com.epam.rd.autocode.spring.project.service.impl.JwtServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class AuthController {
     private final ClientService clientService;
 
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtService;
     private final RefreshTokenService refreshTokenService;
 
 

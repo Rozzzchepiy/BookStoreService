@@ -2,9 +2,9 @@ package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.service.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,8 +13,8 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
 
-    @Override
     @Async
+    @Override
     public void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -22,6 +22,5 @@ public class EmailServiceImpl implements EmailService {
         message.setText(text);
         message.setFrom("noreply@bookservice.com");
         javaMailSender.send(message);
-    }
     }
 }

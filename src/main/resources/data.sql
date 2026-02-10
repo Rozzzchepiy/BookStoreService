@@ -10,7 +10,7 @@ INSERT INTO users (email, name, password, is_blocked, failed_attempt) VALUES
                                               ('employee8@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
                                               ('employee9@employee', 'Employee', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
                                               ('client@client', 'Client One', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
-                                              ('client2@client', 'Client two', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
+                                              ('rozchepiyyura@gmail.com', 'Client two', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
                                               ('client3@client', 'Client three', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
                                               ('client4@client', 'Client four', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),
                                               ('client5@client', 'Client five', '$2a$10$22o4mPYT/cbB2DW7L2w6Ge6JLyo9fPlpZBRJO.NRIIaqHgMUc9ii6', false, 0),

@@ -24,60 +24,59 @@
         <input type="hidden" name="size" th:value="${size}">
     </form>
 
-    <div class="row mt-3"> <div class="col-lg-3 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
-            <div class="card-body">
-
-                <div class="mb-3">
-                    <h6 class="fw-bold" th:text="#{orders.col.status}">Статус</h6>
-                    <div th:each="status : ${allStatuses}" class="form-check">
-                        <input class="form-check-input" type="checkbox" name="statuses"
-                               form="filterForm"
-                               th:value="${status}"
-                               th:checked="${selectedStatuses != null and #lists.contains(selectedStatuses, status)}">
-                        <label class="form-check-label" th:text="${status}">NEW</label>
+    <div class="row mt-3">
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold" th:text="#{catalog.filter.title}">Фільтри</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{orders.col.status}">Статус</h6>
+                        <div th:each="status : ${allStatuses}" class="form-check">
+                            <input class="form-check-input" type="checkbox" name="statuses"
+                                   form="filterForm"
+                                   th:value="${status}"
+                                   th:checked="${selectedStatuses != null and #lists.contains(selectedStatuses, status)}">
+                            <label class="form-check-label" th:text="${status}">NEW</label>
+                        </div>
                     </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{orders.col.date}">Дата замовлення</h6>
+                        <div class="mb-2">
+                            <label class="small text-muted" th:text="#{orders.date.z} ?: 'З:'">З:</label>
+                            <input type="date" class="form-control form-control-sm" name="dateFrom"
+                                   form="filterForm" th:value="${dateFrom}">
+                        </div>
+                        <div>
+                            <label class="small text-muted" th:text="#{orders.date.po} ?: 'По:'">По:</label>
+                            <input type="date" class="form-control form-control-sm" name="dateTo"
+                                   form="filterForm" th:value="${dateTo}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold" th:text="#{catalog.filter.price}">Сума</h6>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text" th:text="#{catalog.price.from}">від</span>
+                            <input type="number" class="form-control" name="minPrice"
+                                   form="filterForm" th:value="${minPrice}" min="0" step="0.01">
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text" th:text="#{catalog.price.to}">до</span>
+                            <input type="number" class="form-control" name="maxPrice"
+                                   form="filterForm" th:value="${maxPrice}" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <button type="submit" form="filterForm" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
+                    <a href="?" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути</a>
                 </div>
-
-                <div class="mb-3">
-                    <h6 class="fw-bold" th:text="#{orders.col.date}">Дата замовлення</h6>
-                    <div class="mb-2">
-                        <label class="small text-muted" th:text="#{orders.date.z} ?: 'З:'">З:</label>
-                        <input type="date" class="form-control form-control-sm" name="dateFrom"
-                               form="filterForm" th:value="${dateFrom}">
-                    </div>
-                    <div>
-                        <label class="small text-muted" th:text="#{orders.date.po} ?: 'По:'">По:</label>
-                        <input type="date" class="form-control form-control-sm" name="dateTo"
-                               form="filterForm" th:value="${dateTo}">
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <h6 class="fw-bold" th:text="#{catalog.filter.price}">Сума</h6>
-                    <div class="input-group input-group-sm mb-2">
-                        <span class="input-group-text" th:text="#{catalog.price.from}">від</span>
-                        <input type="number" class="form-control" name="minPrice"
-                               form="filterForm" th:value="${minPrice}" min="0" step="0.01">
-                    </div>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text" th:text="#{catalog.price.to}">до</span>
-                        <input type="number" class="form-control" name="maxPrice"
-                               form="filterForm" th:value="${maxPrice}" min="0" step="0.01">
-                    </div>
-                </div>
-
-                <button type="submit" form="filterForm" class="btn btn-primary w-100 mt-2" th:text="#{catalog.btn.apply}">Застосувати</button>
-                <a href="?" class="btn btn-outline-secondary w-100 mt-2 btn-sm" th:text="#{catalog.btn.reset}">Скинути</a>
             </div>
         </div>
-    </div>
 
         <div class="col-lg-9">
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
-
                 <div class="input-group" style="max-width: 400px;">
                     <input type="text" class="form-control" name="search"
                            form="filterForm"
@@ -112,7 +111,11 @@
                     <thead class="table-dark">
                     <tr>
                         <th th:text="#{orders.col.id}">ID</th>
+
                         <th sec:authorize="hasRole('EMPLOYEE') or hasRole('ADMIN')" th:text="#{orders.col.client}">Клієнт</th>
+
+                        <th sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')" th:text="#{orders.col.employee}">Працівник</th>
+
                         <th th:text="#{orders.col.date}">Дата</th>
                         <th th:text="#{orders.col.price}">Ціна</th>
                         <th th:text="#{orders.col.status}">Статус</th>
@@ -125,6 +128,11 @@
 
                         <td sec:authorize="hasRole('EMPLOYEE') or hasRole('ADMIN')"
                             th:text="${order.clientEmail}"></td>
+
+                        <td sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')">
+                            <span th:if="${order.employeeEmail != null}" th:text="${order.employeeEmail}"></span>
+                            <span th:if="${order.employeeEmail == null}" class="text-muted">-</span>
+                        </td>
 
                         <td th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy HH:mm')}"></td>
                         <td class="text-success fw-bold" th:text="${order.price} + ' ₴'"></td>
@@ -142,8 +150,7 @@
                         <td class="text-center">
                             <div class="d-flex gap-1 justify-content-center flex-wrap">
 
-                                <div sec:authorize="hasRole('EMPLOYEE')"
-                                     th:if="${order.status?.name() == 'NEW'}">
+                                <div sec:authorize="hasRole('EMPLOYEE')" th:if="${order.status?.name() == 'NEW'}">
                                     <form th:action="@{/orders/{id}/take(id=${order.id}, page=${currentPage}, size=${size}, search=${search}, sortField=${sortField}, sortDir=${sortDir}, minPrice=${minPrice}, maxPrice=${maxPrice}, dateFrom=${dateFrom}, dateTo=${dateTo}, statuses=${selectedStatuses})}" method="post">
                                         <button class="btn btn-success btn-sm" th:text="#{orders.btn.take}">Взяти</button>
                                     </form>
@@ -197,15 +204,11 @@
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                         <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage - 1} + ')'">←</button>
                     </li>
-
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                         th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
                         th:classappend="${currentPage == i} ? 'active'">
-                        <button class="page-link" type="button"
-                                th:text="${i + 1}"
-                                th:onclick="'changePage(' + ${i} + ')'"></button>
+                        <button class="page-link" type="button" th:text="${i + 1}" th:onclick="'changePage(' + ${i} + ')'"></button>
                     </li>
-
                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                         <button class="page-link" type="button" th:onclick="'changePage(' + ${currentPage + 1} + ')'">→</button>
                     </li>

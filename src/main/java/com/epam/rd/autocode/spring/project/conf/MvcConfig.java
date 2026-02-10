@@ -8,10 +8,13 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.time.Duration;
 import java.util.Locale;
+import java.util.TimeZone;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
@@ -32,9 +35,13 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Bean
     public LocaleResolver localeResolver() {
-        SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(new Locale("uk"));
-        return slr;
+        CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver("LANG");
+
+        cookieLocaleResolver.setDefaultLocale(new Locale("uk"));
+
+        cookieLocaleResolver.setCookieMaxAge(Duration.ofDays(365));
+        cookieLocaleResolver.setDefaultTimeZone(TimeZone.getTimeZone("UTC"));
+        return cookieLocaleResolver;
     }
 
     @Bean

@@ -1,7 +1,7 @@
 package com.epam.rd.autocode.spring.project.conf;
 
-import com.epam.rd.autocode.spring.project.service.impl.JwtService;
-import com.epam.rd.autocode.spring.project.service.impl.RefreshTokenService;
+import com.epam.rd.autocode.spring.project.service.JwtService;
+import com.epam.rd.autocode.spring.project.service.RefreshTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
